@@ -1,0 +1,19 @@
+{
+  "name": "diplomna-rabota",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "Yana",
+  "type": "module",
+  "main": "Server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.8",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "sqlite3": "^5.1.7"
+  }
+}
