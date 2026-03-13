@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/styles.css">
+  <title><%= song.title %> - Details</title>
+</head>
+<body>
+  <div id="songContainer">
+    <h1><%= song.title %></h1>
+    <p>Track Number: <%= song.track_number %></p>
+    <p>Duration: <%= song.duration %></p>
+
+    <h2>Album Info</h2>
+    <p>Album: <a href="/albums/<%= album.id %>"><%= album.title %></a></p>
+    <p>Artist: <%= album.artistName %></p>
+    <p>Released: <%= album.release_year %></p>
+
+    <a href="/albums/<%= album.id %>">Back to Album</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/styles.css">
+    <title>Music Library</title>
+</head>
+<body>
+    <div id="container">
+    <nav></nav>
+    <header>
+        <h1>Welcome to the Music App</h1>
+        <p>Recently added albums</p>
+        
+        <div class="search-container">
+            <input type="text" placeholder="Search albums..." class="search-bar">
+        </div>
+    </header>
+
+    <main class="album-list">
+        <% for (let i = 1; i <= maxId; i++) { %>
+            <div class="album-card">
+                <div class="album-info-top">
+                    <h2><%= album.title %> (ID: <%= i %>)</h2>
+                </div>
+                
+                <img src="<%= album.album_cover %>" alt="Album Cover" class="album-cover">
+                
+                <div class="album-info-bottom">
+                    <p><strong>Artist:</strong> <%= album.artistName %></p>
+                    <p><strong>Released:</strong> <%= album.release_year %></p>
+                    <a class="more-info" href="/albums/<%= album.id %>">More info</a>
+                </div>
+            </div>
+        <% } %>
+    </main>
+</div>
+</body>
+</html>

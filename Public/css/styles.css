@@ -1,0 +1,209 @@
+/* =========================================
+   1. GLOBAL & RESET
+   ========================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Circular', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: none; 
+    color: #333;
+    line-height: 1.6;
+}
+
+/* =========================================
+   2. HOME PAGE (The "Box under Box" Layout)
+   ========================================= */
+#container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.search-bar {
+    padding: 12px 20px;
+    width: 100%;
+    max-width: 400px;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    margin: 20px 0 40px 0;
+}
+
+.album-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+}
+
+.album-card {
+    width: 100%;
+    max-width: 450px;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 25px;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.album-card:hover {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transform: translateY(-5px);
+}
+
+.album-cover {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 4px;
+    margin: 15px 0;
+}
+
+.more-info {
+    color: #1DB954;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* =========================================
+   3. ARTIST PAGE (The Grid Layout)
+   ========================================= */
+#artistContainer {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 60px 20px;
+}
+
+#artistContainer h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    letter-spacing: -2px;
+    margin-bottom: 10px;
+}
+
+#artistContainer h2 {
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #666;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+/* Grid of Albums */
+#artistContainer .album-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.albumDisplay {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: left;
+    transition: background 0.2s ease;
+}
+
+.albumDisplay:hover {
+    background: #f0f0f0;
+}
+
+.albumDisplay img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.albumDisplay h3 {
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Keeps titles on one line */
+}
+
+.albumDisplay p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.albumDisplay a {
+    font-size: 0.85rem;
+    color: #1DB954;
+    text-decoration: none;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* =========================================
+   4. ALBUM DETAILS (The Spotify Maneuver)
+   ========================================= */
+#albumContainer {
+    background: linear-gradient(to bottom, #404040 0%, #121212 400px);
+    background-color: #121212;
+    color: #ffffff; 
+    min-height: 100vh;
+    padding: 40px;
+}
+
+.album-header {
+    display: flex;
+    align-items: flex-end;
+    gap: 24px;
+    padding-bottom: 30px;
+}
+
+.albumImage {
+    width: 232px;
+    height: 232px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
+
+.albumTitle {
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 900;
+    margin: 0;
+}
+
+.list-header, .song-row {
+    display: grid;
+    grid-template-columns: 50px 1fr 100px;
+    padding: 10px 16px;
+    align-items: center;
+}
+
+.list-header {
+    color: #b3b3b3;
+    font-size: 0.8rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.song-row:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.songTitle {
+    color: #fff;
+    text-decoration: none;
+}
+
+.trackNumber, .duration {
+    color: #b3b3b3;
+}
+
+/* Responsive fix */
+@media (max-width: 600px) {
+    .album-header { flex-direction: column; align-items: center; text-align: center; }
+    #artistContainer h1 { font-size: 2.5rem; }
+}

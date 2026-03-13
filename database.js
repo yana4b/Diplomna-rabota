@@ -67,11 +67,11 @@ function seedData() {
     db.get("SELECT COUNT(*) AS count FROM songs", (err, row) => {
       if (err) return console.error(err);
       if (row.count === 0) {
-        const sStmt = db.prepare("INSERT INTO songs (album_id, title, duration) VALUES (?, ?, ?)");
-        sStmt.run(1, "Come Together", 259);
-        sStmt.run(1, "Something", 183);
-        sStmt.run(2, "So What", 545);
-        sStmt.run(3, "Blank Space", 231);
+        const sStmt = db.prepare("INSERT INTO songs (album_id, title, track_number) VALUES (?, ?, ?)");
+        sStmt.run(1, "Come Together", 1);
+        sStmt.run(1, "Something", 2);
+        sStmt.run(2, "So What", 3);
+        sStmt.run(3, "Blank Space", 4);
         sStmt.finalize();
       }
     });
@@ -80,6 +80,9 @@ function seedData() {
 
 // initialize schema once when module loads
 initSchema();
+
+// also seed sample rows so front end has something to display
+seedData();
 
 // export the raw db object; callers can run queries or wrap it
 export default db;
