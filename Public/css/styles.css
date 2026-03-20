@@ -1,5 +1,5 @@
 /* =========================================
-   1. GLOBAL & RESET
+   1. GLOBAL STYLES & RESET
    ========================================= */
 * {
     box-sizing: border-box;
@@ -9,49 +9,84 @@
 
 body {
     font-family: 'Circular', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background: none; 
     color: #333;
     line-height: 1.6;
+    background-color: #fff;
 }
 
 /* =========================================
-   2. HOME PAGE (The "Box under Box" Layout)
+   2. HOME PAGE (Targets your EJS structure)
    ========================================= */
 #container {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 0 auto;
     padding: 40px 20px;
     text-align: center;
 }
 
-.search-bar {
-    padding: 12px 20px;
-    width: 100%;
-    max-width: 400px;
-    border: 1px solid #ddd;
-    border-radius: 25px;
-    margin: 20px 0 40px 0;
+header h1 {
+    margin-bottom: 25px;
+    font-weight: 800;
+    font-size: 2.5rem;
 }
 
-.album-list {
+/* Updated Search Form to match the vibe */
+#search-form {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
-    gap: 40px;
+    gap: 12px;
+    margin-bottom: 40px;
+}
+
+#search-form input[type="text"],
+#search-form select {
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 50px; /* Modern Pill Shape */
+    outline: none;
+    font-size: 0.9rem;
+    background: #fdfdfd;
+    transition: all 0.2s ease;
+}
+
+#search-form input[type="text"]:focus {
+    border-color: #1DB954;
+    box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.1);
+}
+
+#search-form a {
+    color: #666;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+}
+
+#search-form a:hover {
+    color: #1DB954;
+}
+
+/* Album Grid Layout */
+.album-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
 }
 
 .album-card {
-    width: 100%;
-    max-width: 450px;
     border: 1px solid #eee;
     border-radius: 12px;
-    padding: 25px;
+    padding: 20px;
     transition: all 0.3s ease;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .album-card:hover {
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     transform: translateY(-5px);
 }
 
@@ -59,18 +94,29 @@ body {
     width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
-    border-radius: 4px;
+    border-radius: 6px;
     margin: 15px 0;
 }
 
-.more-info {
-    color: #1DB954;
+/* "More Info" Button Vibe */
+.album-card a {
+    background-color: #1DB954;
+    color: white;
     text-decoration: none;
+    padding: 10px 24px;
+    border-radius: 50px;
     font-weight: bold;
+    font-size: 0.9rem;
+    margin-top: auto;
+    transition: background 0.2s;
+}
+
+.album-card a:hover {
+    background-color: #1ed760;
 }
 
 /* =========================================
-   3. ARTIST PAGE (The Grid Layout)
+   3. ARTIST PAGE (Restored)
    ========================================= */
 #artistContainer {
     max-width: 1000px;
@@ -95,12 +141,10 @@ body {
     padding-bottom: 10px;
 }
 
-/* Grid of Albums */
-#artistContainer .album-grid {
+.album-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 30px;
-    margin-bottom: 40px;
 }
 
 .albumDisplay {
@@ -111,9 +155,7 @@ body {
     transition: background 0.2s ease;
 }
 
-.albumDisplay:hover {
-    background: #f0f0f0;
-}
+.albumDisplay:hover { background: #f0f0f0; }
 
 .albumDisplay img {
     width: 100%;
@@ -121,38 +163,15 @@ body {
     object-fit: cover;
     border-radius: 4px;
     margin-bottom: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.albumDisplay h3 {
-    font-size: 1.1rem;
-    margin-bottom: 5px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; /* Keeps titles on one line */
-}
-
-.albumDisplay p {
-    font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 10px;
-}
-
-.albumDisplay a {
-    font-size: 0.85rem;
-    color: #1DB954;
-    text-decoration: none;
-    font-weight: bold;
-    text-transform: uppercase;
 }
 
 /* =========================================
-   4. ALBUM DETAILS (The Spotify Maneuver)
+   4. ALBUM DETAILS (SPOTIFY THEME - Restored)
    ========================================= */
 #albumContainer {
     background: linear-gradient(to bottom, #404040 0%, #121212 400px);
     background-color: #121212;
-    color: #ffffff; 
+    color: #ffffff;
     min-height: 100vh;
     padding: 40px;
 }
@@ -168,6 +187,7 @@ body {
     width: 232px;
     height: 232px;
     box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    object-fit: cover;
 }
 
 .albumTitle {
@@ -187,10 +207,12 @@ body {
     color: #b3b3b3;
     font-size: 0.8rem;
     border-bottom: 1px solid rgba(255,255,255,0.1);
+    text-transform: uppercase;
 }
 
 .song-row:hover {
     background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
 }
 
 .songTitle {
@@ -198,12 +220,96 @@ body {
     text-decoration: none;
 }
 
-.trackNumber, .duration {
-    color: #b3b3b3;
+#albumContainer {
+    /* We use a very long gradient (800px) to make the color bleed further down */
+    background: linear-gradient(
+        to bottom, 
+        var(--album-color, #404040) 0%, 
+        rgba(18, 18, 18, 0.8) 500px, 
+        #121212 800px
+    );
+    background-color: #121212;
+    color: #ffffff;
+    min-height: 100vh;
+    padding: 40px;
+    /* This ensures the background stays smooth even if the page is long */
+    background-attachment: local; 
 }
 
-/* Responsive fix */
+/* Make sure the image has an ID so JS can find it */
+.albumImage {
+    width: 232px;
+    height: 232px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    object-fit: cover;
+}
+
+/* =========================================
+   5. RESPONSIVE
+   ========================================= */
 @media (max-width: 600px) {
-    .album-header { flex-direction: column; align-items: center; text-align: center; }
-    #artistContainer h1 { font-size: 2.5rem; }
+    .album-header { flex-direction: column; text-align: center; }
+    .albumImage { width: 180px; height: 180px; }
+    #search-form { flex-direction: column; }
+    #search-form input[type="text"] { width: 100%; }
+}
+
+#search-form input[type="password"] {
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 50px;
+    outline: none;
+    font-size: 0.9rem;
+    background: #fdfdfd;
+    transition: all 0.2s ease;
+    margin-bottom: 10px;
+}
+
+#search-form input[type="password"]:focus {
+    border-color: #1DB954;
+    box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.1);
+}
+
+.more-info-btn {
+    background-color: #1DB954;
+    color: white;
+    text-decoration: none;
+    padding: 10px 24px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+    display: inline-block;
+}
+
+nav a {
+    color: #1DB954;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#search-form input[type="password"] {
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 50px;
+    outline: none;
+    font-size: 0.9rem;
+    background: #fdfdfd;
+    transition: all 0.2s ease;
+}
+
+#search-form input[type="password"]:focus {
+    border-color: #1DB954;
+    box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.1);
+}
+
+.album-card h2 {
+    font-size: 1.2rem;
+    margin: 10px 0 5px;
+}
+
+.album-card p {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 15px;
 }

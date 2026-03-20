@@ -1,32 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/css/styles.css">
-  <title><%= artist.name %> - Albums</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/styles.css">
+    <title><%= artist.name %></title>
 </head>
 <body>
-  <div id="artistContainer">
-    <h1><%= artist.name %></h1>
-    <h2>Albums:</h2>
-
-    <% if (albums.length === 0) { %>
-      <p>No albums for this artist yet.</p>
-    <% } else { %>
-      <% albums.forEach(album => { %>
-        <div class="albumDisplay">
-          <img src="/images/symbolic.jpg" alt="<%= album.title %>">
-          <h3><%= album.title %></h3>
-          <p>Released: <%= album.release_year %></p>
-
-          <!-- LINK to album page -->
-          <a href="/albums/<%= album.id %>">More info</a>
+    <div id="artistContainer">
+        <h1><%= artist.name %></h1>
+        <h2>Discography</h2>
+        <div class="album-grid">
+            <% albums.forEach(album => { %>
+                <div class="albumDisplay">
+                    <img src="<%= album.album_cover %>">
+                    <h3><%= album.title %></h3>
+                    <p><%= album.release_year %></p>
+                    <a href="/albums/<%= album.id %>" class="more-info-btn">More info</a>
+                </div>
+            <% }) %>
         </div>
-      <% }) %>
-    <% } %>
-
-    <a href="/">Back to Album List</a>
-  </div>
+        <a href="/" class="more-info" style="display:inline-block; margin-top:30px;">Back to Home</a>
+    </div>
 </body>
 </html>

@@ -2,11 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/styles.css">
-    <title>Document</title>
+    <title>Admin Panel</title>
+    <style>
+        .admin-section { background: #f9f9f9; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: left; }
+        .admin-form { display: grid; gap: 10px; margin-top: 10px; }
+        input, select { padding: 10px; border-radius: 5px; border: 1px solid #ddd; }
+    </style>
 </head>
 <body>
-    
+    <div id="container">
+        <header>
+            <h1>Admin Panel</h1>
+            <nav><a href="/" class="more-info">Home</a> | <a href="/logout">Logout</a></nav>
+        </header>
+
+        <div class="admin-section">
+            <h3>Add New Album</h3>
+            <form action="/admin/add-album" method="POST" class="admin-form">
+                <input type="text" name="title" placeholder="Album Title" required>
+                <input type="number" name="release_year" placeholder="Year" required>
+                <select name="artist_id" required>
+                    <% artists.forEach(artist => { %>
+                        <option value="<%= artist.id %>"><%= artist.name %></option>
+                    <% }) %>
+                </select>
+                <button type="submit" class="more-info-btn" style="border:none;">Add Album</button>
+            </form>
+        </div>
+
+        <div class="admin-section">
+            <h3>Add New Song</h3>
+            <form action="/admin/add-song" method="POST" class="admin-form">
+                <input type="text" name="title" placeholder="Song Title" required>
+                <input type="number" name="track_number" placeholder="Track #" required>
+                <input type="text" name="length" placeholder="Duration (e.g. 4:20)" required>
+                <select name="album_id" required>
+                    <% albums.forEach(album => { %>
+                        <option value="<%= album.id %>"><%= album.title %></option>
+                    <% }) %>
+                </select>
+                <button type="submit" class="more-info-btn" style="border:none;">Add Song</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

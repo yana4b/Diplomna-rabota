@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/css/styles.css">
-  <title><%= song.title %> - Details</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/styles.css">
+    <title><%= song.title %></title>
 </head>
 <body>
-  <div id="songContainer">
-    <h1><%= song.title %></h1>
-    <p>Track Number: <%= song.track_number %></p>
-    <p>Duration: <%= song.duration %></p>
-
-    <h2>Album Info</h2>
-    <p>Album: <a href="/albums/<%= album.id %>"><%= album.title %></a></p>
-    <p>Artist: <%= album.artistName %></p>
-    <p>Released: <%= album.release_year %></p>
-
-    <a href="/albums/<%= album.id %>">Back to Album</a>
-  </div>
+    <div id="container">
+        <h1><%= song.title %></h1>
+        <p>Track <%= song.track_number %> • <%= song.length %></p>
+        
+        <div style="margin: 40px 0; padding: 20px; border-top: 1px solid #eee;">
+            <h3>Album Info</h3>
+            <p>From: <a href="/albums/<%= album.id %>" class="more-info"><%= album.title %></a></p>
+            <p>By: <%= album.artistName %></p>
+        </div>
+        
+        <a href="/albums/<%= album.id %>" class="more-info-btn">Back to Album</a>
+    </div>
 </body>
 </html>

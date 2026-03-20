@@ -7,34 +7,70 @@
     <title>Music Library</title>
 </head>
 <body>
-    <div id="container">
-    <nav></nav>
-    <header>
-        <h1>Welcome to the Music App</h1>
-        <p>Recently added albums</p>
-        
-        <div class="search-container">
-            <input type="text" placeholder="Search albums..." class="search-bar">
-        </div>
-    </header>
-
-    <main class="album-list">
-        <% for (let i = 1; i <= maxId; i++) { %>
-            <div class="album-card">
-                <div class="album-info-top">
-                    <h2><%= album.title %> (ID: <%= i %>)</h2>
-                </div>
-                
-                <img src="<%= album.album_cover %>" alt="Album Cover" class="album-cover">
-                
-                <div class="album-info-bottom">
-                    <p><strong>Artist:</strong> <%= album.artistName %></p>
-                    <p><strong>Released:</strong> <%= album.release_year %></p>
-                    <a class="more-info" href="/albums/<%= album.id %>">More info</a>
-                </div>
-            </div>
+    <nav style="display: flex; justify-content: flex-end; padding: 20px 40px; gap: 20px;">
+        <% if (user) { %>
+            <span style="font-size: 0.9rem;">Welcome, <strong><%= user.username %></strong></span>
+            <% if (user.role === 'admin') { %>
+                <a href="/admin" style="color: #1DB954; text-decoration: none; font-weight: bold;">Admin Panel</a>
+            <% } %>
+            <a href="/logout" style="color: #666; text-decoration: none;">Logout</a>
+        <% } else { %>
+            <a href="/login" style="color: #1DB954; text-decoration: none; font-weight: bold;">Login</a>
+            <a href="/signup" style="color: #666; text-decoration: none;">Sign Up</a>
         <% } %>
-    </main>
-</div>
+    </nav>
+
+    <div id="container">
+        <header>
+            <h1>Music App</h1>
+            <form action="/" method="GET" id="search-form">
+                <input type="text" name="search" id="search-input" placeholder="Search..." value="<%= filters.search %>" autocomplete="off">
+                
+                <select name="genre" onchange="this.form.submit()">
+                    <option value="">All Genres</option>
+                    <% ['Rock', 'Pop', 'Electronic', 'Jazz', 'Metal', 'Death Metal'].forEach(g => { %>
+                        <option value="<%= g %>" <%= filters.genre === g ? 'selected' : '' %>><%= g %></option>
+                    <% }) %>
+                </select>
+
+                <select name="year" onchange="this.form.submit()">
+                    <option value="">All Years</option>
+                    <% for(let y = 2026; y >= 1950; y--) { %>
+                        <option value="<%= y %>" <%= filters.year == y ? 'selected' : '' %>><%= y %></option>
+                    <% } %>
+                </select>
+
+                <a href="/" class="reset-link">Reset</a>
+            </form>
+        </header>
+
+        <main class="album-list">
+            <% if (albums.length > 0) { %>
+                <% albums.forEach(album => { %>
+                    <div class="album-card">
+                        <img src="<%= album.album_cover %>" class="album-cover" onerror="this.src='/img/default-cover.jpg'">
+                        <h2><%= album.title %></h2>
+                        <p><strong><%= album.artistName %></strong> • <%= album.release_year %></p>
+                        <a href="/albums/<%= album.id %>" class="more-info-btn">More info</a>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p>No results found.</p>
+            <% } %>
+        </main>
+    </div>
+
+    <script>
+        const searchInput = document.getElementById('search-input');
+        let timer;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(timer);
+            timer = setTimeout(() => document.getElementById('search-form').submit(), 500);
+        });
+        if (searchInput.value) {
+            searchInput.focus();
+            const v = searchInput.value; searchInput.value = ''; searchInput.value = v;
+        }
+    </script>
 </body>
 </html>

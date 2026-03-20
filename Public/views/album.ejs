@@ -1,58 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/css/styles.css">
-  <title><%= album.title %> - Album Details</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/styles.css">
+    <title><%= album.title %></title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
 </head>
 <body>
-  <div id="albumContainer">
-  <header class="album-header">
-    <div class="image-wrapper">
-      <img src="/images/symbolic.jpg" alt="<%= album.title %>" class="albumImage">
-    </div>
-    <div class="header-text">
-      <p class="eyebrow">ALBUM</p>
-      <h1 class="albumTitle"><%= album.title %></h1>
-      <div class="meta-data">
-        <span class="artistName"><strong><%= album.artistName %></strong></span> • 
-        <span class="releaseYear"><%= album.release_year %></span>
-      </div>
-    </div>
-  </header>
-
-  <div class="content-section">
-    <p class="description"><%= album.description || "No description available." %></p>
-
-    <div id="songsContainer">
-      <div class="list-header">
-        <span class="hash">#</span>
-        <span>TITLE</span>
-        <span class="clock">⏱</span>
-      </div>
-      <hr>
-
-      <% if (songs.length === 0) { %>
-        <p class="empty-msg">No songs available for this album.</p>
-      <% } else { %>
-        <% songs.forEach(song => { %>
-          <div class="song-row">
-            <p class="trackNumber"><%= song.track_number %></p>
-            <div class="song-main">
-               <a href="/songs/<%= song.id %>" class="songTitle"><%= song.title %></a>
+    <div id="albumContainer">
+        <header class="album-header">
+            <img src="<%= album.album_cover %>" class="albumImage" crossorigin="anonymous">
+            <div class="header-text">
+                <p>ALBUM</p>
+                <h1 class="albumTitle"><%= album.title %></h1>
+                <div class="meta-data">
+                    <strong><%= album.artistName %></strong> • <%= album.release_year %>
+                </div>
             </div>
-            <p class="duration"><%= song.duration %></p>
-          </div>
-        <% }) %>
-      <% } %>
+        </header>
+
+        <div class="content-section">
+            <p style="margin-bottom: 20px; opacity: 0.8;"><%= album.description || "No description available." %></p>
+            
+            <div class="list-header"><span>#</span><span>TITLE</span><span>TIME</span></div>
+            <hr style="opacity: 0.1; margin: 10px 0;">
+            
+            <% songs.forEach(song => { %>
+                <div class="song-row">
+                    <p class="trackNumber"><%= song.track_number %></p>
+                    <a href="/songs/<%= song.id %>" class="songTitle"><%= song.title %></a>
+                    <p class="duration"><%= song.length || "--:--" %></p>
+                </div>
+            <% }) %>
+
+            <nav style="margin-top: 40px;">
+                <a href="/artists/<%= album.artist_id %>" class="more-info">Back to Artist</a> | 
+                <a href="/" class="more-info">Home</a>
+            </nav>
+        </div>
     </div>
 
-    <nav class="footer-nav">
-      <a href="/artists/<%= album.artist_id %>">Back to Artist</a>
-      <a href="/">Back to Home</a>
-    </nav>
-  </div>
-</div>
+    <script>
+        const img = document.querySelector('.albumImage');
+        const container = document.getElementById('albumContainer');
+        const colorThief = new ColorThief();
+        const updateBG = () => {
+            const rgb = colorThief.getColor(img);
+            container.style.setProperty('--album-color', `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`);
+        };
+        if (img.complete) updateBG(); else img.addEventListener('load', updateBG);
+    </script>
 </body>
 </html>

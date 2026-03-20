@@ -2,11 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/styles.css">
-    <title>Document</title>
+    <title>User Profile</title>
 </head>
 <body>
-    
+    <div id="container">
+        <h1>User Profile</h1>
+        <div class="album-card" style="max-width: 300px; margin: 0 auto;">
+            <p><strong>Username:</strong> <%= user.username %></p>
+            <p><strong>Role:</strong> <%= user.role %></p>
+        </div>
+        <br>
+        <a href="/" class="more-info">Back Home</a>
+    </div>
 </body>
 </html>

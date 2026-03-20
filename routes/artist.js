@@ -1,53 +1,26 @@
 import express from "express";
 import db from "../database.js";
-
-// minimal router object for artists
 const router = express.Router();
 
-    // bool isAdmin = false;
-    // role = "SELECT role FROM users WHERE id = ?";
-    // if(role = "admin"){
-    //     isAdmin = true;
-    // }
-
-// add your route handlers here as needed
-router.get("/", (req, res) => {
-  // example: get all artists
-  db.all("SELECT * FROM artists", (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(rows);
-  });
-});
-
 router.get("/:id", (req, res) => {
-  const { id } = req.params;
+    const { id } = req.params;
+    db.get("SELECT * FROM artists WHERE id = ?", [id], (err, artist) => {
+        if (err || !artist) return res.status(404).send("Not found");
 
-  // Get artist info
-  db.get("SELECT * FROM artists WHERE id = ?", [id], (err, artistRow) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!artistRow) return res.status(404).send("Artist not found");
+        const sql = `
+            SELECT a.*, img.image 
+            FROM Albums a
+            LEFT JOIN Album_images img ON a.id = img.album_id
+            WHERE a.artist_id = ?`;
 
-    // Get albums for this artist
-    db.all("SELECT * FROM albums WHERE artist_id = ?", [id], (err, albums) => {
-      if (err) return res.status(500).json({ error: err.message });
-      if (!albums) albums = [];
-
-      // For testing, add hardcoded songs inside album object (optional)
-      albums = albums.map(album => ({
-        ...album,
-        songs: [
-          { track_number: 1, title: "Test Song 1", duration: "3:45" },
-          { track_number: 2, title: "Test Song 2", duration: "4:20" },
-        ]
-      }));
-
-      // Render artist.ejs
-      res.render("artist", { artist: artistRow, albums });
+        db.all(sql, [id], (err, rows) => {
+            const albums = rows.map(a => ({
+                ...a,
+                album_cover: a.image ? `data:image/jpeg;base64,${a.image.toString('base64')}` : "/images/default.jpg"
+            }));
+            res.render("artist", { artist, albums });
+        });
     });
-  });
 });
-
 
 export default router;
