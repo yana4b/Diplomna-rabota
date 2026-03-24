@@ -14,9 +14,6 @@ body {
     background-color: #fff;
 }
 
-/* =========================================
-   2. HOME PAGE (Targets your EJS structure)
-   ========================================= */
 #container {
     max-width: 1000px;
     margin: 0 auto;
@@ -30,7 +27,9 @@ header h1 {
     font-size: 2.5rem;
 }
 
-/* Updated Search Form to match the vibe */
+/* =========================================
+   2. HOME PAGE COMPONENTS
+   ========================================= */
 #search-form {
     display: flex;
     flex-wrap: wrap;
@@ -41,34 +40,23 @@ header h1 {
 }
 
 #search-form input[type="text"],
+#search-form input[type="password"],
 #search-form select {
     padding: 10px 20px;
     border: 1px solid #ddd;
-    border-radius: 50px; /* Modern Pill Shape */
+    border-radius: 50px;
     outline: none;
     font-size: 0.9rem;
     background: #fdfdfd;
     transition: all 0.2s ease;
 }
 
-#search-form input[type="text"]:focus {
+#search-form input:focus, 
+#search-form select:focus {
     border-color: #1DB954;
     box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.1);
 }
 
-#search-form a {
-    color: #666;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.85rem;
-    transition: color 0.2s;
-}
-
-#search-form a:hover {
-    color: #1DB954;
-}
-
-/* Album Grid Layout */
 .album-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -83,6 +71,7 @@ header h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
 }
 
 .album-card:hover {
@@ -98,8 +87,11 @@ header h1 {
     margin: 15px 0;
 }
 
-/* "More Info" Button Vibe */
-.album-card a {
+.album-card h2 { font-size: 1.2rem; margin: 10px 0 5px; }
+.album-card p { font-size: 0.9rem; color: #666; margin-bottom: 15px; }
+
+/* Buttons & Links */
+.more-info-btn, .album-card a {
     background-color: #1DB954;
     color: white;
     text-decoration: none;
@@ -109,78 +101,26 @@ header h1 {
     font-size: 0.9rem;
     margin-top: auto;
     transition: background 0.2s;
+    display: inline-block;
 }
 
-.album-card a:hover {
+.more-info-btn:hover, .album-card a:hover {
     background-color: #1ed760;
 }
 
 /* =========================================
-   3. ARTIST PAGE (Restored)
+   3. ARTIST & ALBUM DETAILS (SPOTIFY THEME)
    ========================================= */
-#artistContainer {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 60px 20px;
-}
+#artistContainer { max-width: 1000px; margin: 0 auto; padding: 60px 20px; }
+#artistContainer h1 { font-size: 3.5rem; font-weight: 900; letter-spacing: -2px; }
 
-#artistContainer h1 {
-    font-size: 3.5rem;
-    font-weight: 900;
-    letter-spacing: -2px;
-    margin-bottom: 10px;
-}
-
-#artistContainer h2 {
-    font-size: 1.2rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: #666;
-    margin-bottom: 30px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-}
-
-.album-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 30px;
-}
-
-.albumDisplay {
-    background: #f9f9f9;
-    padding: 15px;
-    border-radius: 8px;
-    text-align: left;
-    transition: background 0.2s ease;
-}
-
-.albumDisplay:hover { background: #f0f0f0; }
-
-.albumDisplay img {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: 4px;
-    margin-bottom: 12px;
-}
-
-/* =========================================
-   4. ALBUM DETAILS (SPOTIFY THEME - Restored)
-   ========================================= */
 #albumContainer {
-    background: linear-gradient(to bottom, #404040 0%, #121212 400px);
+    background: linear-gradient(to bottom, var(--album-color, #404040) 0%, rgba(18, 18, 18, 0.8) 500px, #121212 800px);
     background-color: #121212;
     color: #ffffff;
     min-height: 100vh;
     padding: 40px;
-}
-
-.album-header {
-    display: flex;
-    align-items: flex-end;
-    gap: 24px;
-    padding-bottom: 30px;
+    background-attachment: local; 
 }
 
 .albumImage {
@@ -190,58 +130,141 @@ header h1 {
     object-fit: cover;
 }
 
-.albumTitle {
-    font-size: clamp(2rem, 5vw, 4rem);
-    font-weight: 900;
-    margin: 0;
-}
-
-.list-header, .song-row {
+.song-row {
     display: grid;
     grid-template-columns: 50px 1fr 100px;
     padding: 10px 16px;
     align-items: center;
 }
 
-.list-header {
-    color: #b3b3b3;
-    font-size: 0.8rem;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    text-transform: uppercase;
+.song-row:hover { background-color: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+
+/* =========================================
+   4. ADMIN PANEL (CLEANED)
+   ========================================= */
+.admin-flex-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 30px;
+    margin-top: 30px;
+    flex-wrap: wrap;
 }
 
-.song-row:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
+.admin-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 15px;
+    padding: 30px;
+    width: 450px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    text-align: left;
+    position: relative;
 }
 
-.songTitle {
-    color: #fff;
+.admin-card h3 {
+    color: #1DB954;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Form Elements */
+.admin-card input, 
+.admin-card select, 
+.admin-card textarea {
+    width: 100%;
+    padding: 12px 20px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 50px;
+    outline: none;
+    font-size: 0.9rem;
+    background: #fdfdfd;
+    display: block;
+}
+
+.admin-card textarea { border-radius: 15px; resize: none; }
+
+.input-row { display: flex; gap: 10px; width: 100%; margin-bottom: 15px; }
+.input-row input { flex: 1; margin-bottom: 0; }
+
+.divider { border: 0; border-top: 1px solid #eee; margin: 25px 0; }
+
+/* Custom Upload */
+.custom-upload {
+    position: relative;
+    width: 100%;
+    height: 54px;
+    border: 1px solid #ddd;
+    border-radius: 50px;
+    background: #fdfdfd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    color: #888;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.custom-upload input[type="file"] {
+    position: absolute;
+    left: 0; top: 0; width: 100%; height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.custom-upload i { color: #1DB954; width: 18px; }
+
+
+
+/* Admin Buttons & Navigation */
+.admin-card button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #1DB954;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.header-links {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.logout-link {
+    color: #666;
     text-decoration: none;
+    font-weight: bold;
+    font-size: 0.9rem;
+    background: none;
+    border: none;
+    cursor: pointer;
 }
 
-#albumContainer {
-    /* We use a very long gradient (800px) to make the color bleed further down */
-    background: linear-gradient(
-        to bottom, 
-        var(--album-color, #404040) 0%, 
-        rgba(18, 18, 18, 0.8) 500px, 
-        #121212 800px
-    );
-    background-color: #121212;
-    color: #ffffff;
-    min-height: 100vh;
-    padding: 40px;
-    /* This ensures the background stays smooth even if the page is long */
-    background-attachment: local; 
-}
+.logout-link:hover { color: #ff4d4d; }
 
-/* Make sure the image has an ID so JS can find it */
-.albumImage {
-    width: 232px;
-    height: 232px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
-    object-fit: cover;
+.delete-circle-btn {
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* =========================================
@@ -252,64 +275,5 @@ header h1 {
     .albumImage { width: 180px; height: 180px; }
     #search-form { flex-direction: column; }
     #search-form input[type="text"] { width: 100%; }
-}
-
-#search-form input[type="password"] {
-    padding: 10px 20px;
-    border: 1px solid #ddd;
-    border-radius: 50px;
-    outline: none;
-    font-size: 0.9rem;
-    background: #fdfdfd;
-    transition: all 0.2s ease;
-    margin-bottom: 10px;
-}
-
-#search-form input[type="password"]:focus {
-    border-color: #1DB954;
-    box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.1);
-}
-
-.more-info-btn {
-    background-color: #1DB954;
-    color: white;
-    text-decoration: none;
-    padding: 10px 24px;
-    border-radius: 50px;
-    font-weight: bold;
-    font-size: 0.9rem;
-    transition: background 0.2s;
-    display: inline-block;
-}
-
-nav a {
-    color: #1DB954;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-#search-form input[type="password"] {
-    padding: 10px 20px;
-    border: 1px solid #ddd;
-    border-radius: 50px;
-    outline: none;
-    font-size: 0.9rem;
-    background: #fdfdfd;
-    transition: all 0.2s ease;
-}
-
-#search-form input[type="password"]:focus {
-    border-color: #1DB954;
-    box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.1);
-}
-
-.album-card h2 {
-    font-size: 1.2rem;
-    margin: 10px 0 5px;
-}
-
-.album-card p {
-    font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 15px;
+    .admin-card { width: 100%; }
 }

@@ -4,19 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/styles.css">
-    <title>Music Library</title>
+    <title>Music App</title>
 </head>
 <body>
     <nav style="display: flex; justify-content: flex-end; padding: 20px 40px; gap: 20px;">
         <% if (user) { %>
-            <span style="font-size: 0.9rem;">Welcome, <strong><%= user.username %></strong></span>
+            <span>Logged in as <strong><%= user.username %></strong></span>
             <% if (user.role === 'admin') { %>
-                <a href="/admin" style="color: #1DB954; text-decoration: none; font-weight: bold;">Admin Panel</a>
+                <a href="/admin">Admin Panel</a>
             <% } %>
-            <a href="/logout" style="color: #666; text-decoration: none;">Logout</a>
+            <a href="/logout" style="color: #666;">Logout</a>
         <% } else { %>
-            <a href="/login" style="color: #1DB954; text-decoration: none; font-weight: bold;">Login</a>
-            <a href="/signup" style="color: #666; text-decoration: none;">Sign Up</a>
+            <a href="/login">Login</a>
         <% } %>
     </nav>
 
@@ -24,53 +23,37 @@
         <header>
             <h1>Music App</h1>
             <form action="/" method="GET" id="search-form">
-                <input type="text" name="search" id="search-input" placeholder="Search..." value="<%= filters.search %>" autocomplete="off">
-                
-                <select name="genre" onchange="this.form.submit()">
-                    <option value="">All Genres</option>
-                    <% ['Rock', 'Pop', 'Electronic', 'Jazz', 'Metal', 'Death Metal'].forEach(g => { %>
-                        <option value="<%= g %>" <%= filters.genre === g ? 'selected' : '' %>><%= g %></option>
-                    <% }) %>
-                </select>
-
-                <select name="year" onchange="this.form.submit()">
-                    <option value="">All Years</option>
-                    <% for(let y = 2026; y >= 1950; y--) { %>
-                        <option value="<%= y %>" <%= filters.year == y ? 'selected' : '' %>><%= y %></option>
-                    <% } %>
-                </select>
-
-                <a href="/" class="reset-link">Reset</a>
+                <input type="text" name="search" placeholder="Search..." value="<%= filters.search %>">
+                <button type="submit" class="more-info-btn">Search</button>
             </form>
         </header>
 
         <main class="album-list">
-            <% if (albums.length > 0) { %>
-                <% albums.forEach(album => { %>
-                    <div class="album-card">
-                        <img src="<%= album.album_cover %>" class="album-cover" onerror="this.src='/img/default-cover.jpg'">
-                        <h2><%= album.title %></h2>
-                        <p><strong><%= album.artistName %></strong> • <%= album.release_year %></p>
-                        <a href="/albums/<%= album.id %>" class="more-info-btn">More info</a>
+            <% albums.forEach(album => { %>
+                <div class="album-card">
+                    
+                    <% if (user && user.role === 'admin') { %>
+                        <form action="/admin/delete-album" method="POST" class="admin-delete-form" onsubmit="return confirm('Delete this album?');">
+                            <input type="hidden" name="album_id" value="<%= album.id %>">
+                            <button type="submit" class="delete-circle-btn">✕</button>
+                        </form>
+                    <% } %>
+
+                    <% if (album.album_cover) { %>
+                        <img src="<%= album.album_cover %>" alt="Cover" class="album-cover">
+                    <% } else { %>
+                        <div class="no-cover-placeholder">No Cover</div>
+                    <% } %>
+
+                    <h2><%= album.title %></h2>
+                    <p><%= album.artistName %> • <%= album.release_year %></p>
+                    
+                    <div style="display: flex; gap: 10px; width: 100%;">
+                        <a href="/albums/<%= album.id %>" style="flex: 1; text-align: center;">More info</a>
                     </div>
-                <% }) %>
-            <% } else { %>
-                <p>No results found.</p>
-            <% } %>
+                </div>
+            <% }) %>
         </main>
     </div>
-
-    <script>
-        const searchInput = document.getElementById('search-input');
-        let timer;
-        searchInput.addEventListener('input', () => {
-            clearTimeout(timer);
-            timer = setTimeout(() => document.getElementById('search-form').submit(), 500);
-        });
-        if (searchInput.value) {
-            searchInput.focus();
-            const v = searchInput.value; searchInput.value = ''; searchInput.value = v;
-        }
-    </script>
 </body>
 </html>

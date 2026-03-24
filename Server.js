@@ -5,6 +5,8 @@ import bcrypt from "bcryptjs";
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import db from "./database.js";
+import multer from "multer";
+
 import albumRoutes from "./routes/album.js";
 import artistRoutes from "./routes/artist.js";  
 import songRoutes from "./routes/songs.js";
@@ -12,7 +14,8 @@ import songRoutes from "./routes/songs.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const app = express();
-const PORT = 3000;
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 app.set("views", join(__dirname, "Public", "views")); 
 app.set("view engine", "ejs");
@@ -23,10 +26,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(join(__dirname, "Public")));
 
 app.use(session({
-    secret: 'music-app-secret',
+    secret: 'music-app-super-secret',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }
+    cookie: { secure: false } 
 }));
 
 app.use((req, res, next) => {
@@ -35,41 +38,25 @@ app.use((req, res, next) => {
 });
 
 const isAdmin = (req, res, next) => {
-    if (req.session.user && req.session.user.role === 'admin') next();
-    else res.status(403).send("Access Denied");
+    if (req.session.user && req.session.user.role === 'admin') {
+        next();
+    } else {
+        res.status(403).render('login', { error: "Unauthorized: Admins only." });
+    }
 };
 
 app.get('/signup', (req, res) => res.render('signup', { error: null }));
-
 app.post('/signup', (req, res) => {
     const { username, password } = req.body;
-    
-    if (!username || !password) {
-        return res.render('signup', { error: "Please fill in all fields" });
-    }
-
     const hash = bcrypt.hashSync(password, 10);
-    const role = 'user'; 
-
-
     db.run("INSERT INTO Users (username, password_hash, role) VALUES (?, ?, ?)", 
-    [username, hash, role], function(err) {
-        if (err) {
-            console.error("Signup Database Error:", err.message); 
-            
-            if (err.message.includes("UNIQUE constraint failed")) {
-                return res.render('signup', { error: "That username is already taken." });
-            }
-            return res.render('signup', { error: "Database error: " + err.message });
-        }
+    [username, hash, 'user'], (err) => {
+        if (err) return res.render('signup', { error: "Username taken." });
         res.redirect('/login');
     });
 });
 
-
-
 app.get('/login', (req, res) => res.render('login', { error: null }));
-
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
     db.get("SELECT * FROM Users WHERE username = ?", [username], (err, user) => {
@@ -77,7 +64,7 @@ app.post('/login', (req, res) => {
             req.session.user = { id: user.id, username: user.username, role: user.role };
             res.redirect('/');
         } else {
-            res.render('login', { error: "Invalid username or password" });
+            res.render('login', { error: "Invalid credentials" });
         }
     });
 });
@@ -88,28 +75,56 @@ app.get('/logout', (req, res) => {
 });
 
 app.get('/admin', isAdmin, (req, res) => {
-    db.all("SELECT id, name FROM Artists", [], (err, artists) => {
-        db.all("SELECT id, title FROM Albums", [], (err, albums) => {
+    const artistSql = "SELECT id, name FROM Artists ORDER BY name ASC";
+    const albumSql = "SELECT id, title FROM Albums ORDER BY title ASC";
+
+    db.all(artistSql, [], (err, artists) => {
+        db.all(albumSql, [], (err2, albums) => {
             res.render('admin', { artists, albums });
         });
     });
 });
 
-app.post('/admin/add-album', isAdmin, (req, res) => {
-    const { title, release_year, artist_id } = req.body;
-    db.run("INSERT INTO Albums (title, release_year, artist_id) VALUES (?, ?, ?)", 
-    [title, release_year, artist_id], (err) => {
+app.post('/admin/add-album', isAdmin, upload.single('album_image'), (req, res) => {
+    const { title, artist_id, release_year, description } = req.body;
+    
+    db.run("INSERT INTO Albums (title, artist_id, release_year, description) VALUES (?, ?, ?, ?)", 
+    [title, artist_id, release_year, description], function(err) {
+        if (err) return res.status(500).send(err.message);
+        
+        const albumId = this.lastID;
+
+        if (req.file) {
+            db.run("INSERT INTO Album_images (album_id, image) VALUES (?, ?)", [albumId, req.file.buffer], (err) => {
+                res.redirect('/admin');
+            });
+        } else {
+            res.redirect('/admin');
+        }
+    });
+});
+
+app.post('/admin/add-artist', isAdmin, (req, res) => {
+    const { name, genre, origin } = req.body;
+    db.run("INSERT INTO Artists (name, genre, origin) VALUES (?, ?, ?)", [name, genre, origin], (err) => {
         if (err) return res.status(500).send(err.message);
         res.redirect('/admin');
     });
 });
 
 app.post('/admin/add-song', isAdmin, (req, res) => {
-    const { title, track_number, length, album_id } = req.body;
-    db.run("INSERT INTO Songs (title, track_number, length, album_id) VALUES (?, ?, ?, ?)",
-    [title, track_number, length, album_id], (err) => {
+    const { title, album_id, track_number, length } = req.body;
+    db.run("INSERT INTO Songs (title, album_id, track_number, length) VALUES (?, ?, ?, ?)", 
+    [title, album_id, track_number, length], (err) => {
         if (err) return res.status(500).send(err.message);
         res.redirect('/admin');
+    });
+});
+
+app.post('/admin/delete-album', isAdmin, (req, res) => {
+    const { album_id } = req.body;
+    db.run("DELETE FROM Songs WHERE album_id = ?", [album_id], () => {
+        db.run("DELETE FROM Albums WHERE id = ?", [album_id], () => res.redirect('/'));
     });
 });
 
@@ -118,28 +133,27 @@ app.use("/artists", artistRoutes);
 app.use("/songs", songRoutes);
 
 app.get('/', (req, res) => {
-    const { search, genre, year } = req.query;
-    let sql = `
-        SELECT a.id, a.title, a.release_year, art.name AS artistName, art.genre, img.image
-        FROM Albums a
-        LEFT JOIN Artists art ON a.artist_id = art.id
-        LEFT JOIN Album_images img ON a.id = img.album_id
-        WHERE 1=1
-    `;
-    const params = [];
-    if (search) { sql += ` AND (a.title LIKE ? OR art.name LIKE ?)`; params.push(`%${search}%`, `%${search}%`); }
-    if (genre) { sql += ` AND art.genre = ?`; params.push(genre); }
-    if (year) { sql += ` AND a.release_year = ?`; params.push(year); }
-    sql += ` GROUP BY a.id ORDER BY a.title ASC`;
+    const { search } = req.query;
+    let sql = `SELECT a.id, a.title, a.release_year, art.name as artistName, art.genre, img.image 
+               FROM Albums a 
+               LEFT JOIN Artists art ON a.artist_id = art.id 
+               LEFT JOIN Album_images img ON a.id = img.album_id 
+               WHERE 1=1`;
+    let params = [];
+    if (search) { 
+        sql += " AND (a.title LIKE ? OR art.name LIKE ?)"; 
+        params.push(`%${search}%`, `%${search}%`); 
+    }
+    
+    sql += " GROUP BY a.id ORDER BY a.title ASC";
 
     db.all(sql, params, (err, rows) => {
-        if (err) return res.status(500).send(err.message);
         const albums = rows.map(row => ({
             ...row,
-            album_cover: row.image ? `data:image/jpeg;base64,${Buffer.from(row.image).toString('base64')}` : "/img/default-cover.jpg"
+            album_cover: row.image ? `data:image/jpeg;base64,${Buffer.from(row.image).toString('base64')}` : "/img/default.jpg"
         }));
-        res.render('index', { albums, filters: { search: search || '', genre: genre || '', year: year || '' } }); 
+        res.render('index', { albums, filters: { search: search || '', genre: '', year: '' } });
     });
 });
 
-app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
+app.listen(3000, () => console.log("Server running at http://localhost:3000"));

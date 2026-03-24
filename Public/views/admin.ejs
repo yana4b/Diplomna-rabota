@@ -2,49 +2,81 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/styles.css">
-    <title>Admin Panel</title>
-    <style>
-        .admin-section { background: #f9f9f9; padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: left; }
-        .admin-form { display: grid; gap: 10px; margin-top: 10px; }
-        input, select { padding: 10px; border-radius: 5px; border: 1px solid #ddd; }
-    </style>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>Admin Control Panel</title>
 </head>
-<body>
+<body class="admin-page">
     <div id="container">
         <header>
-            <h1>Admin Panel</h1>
-            <nav><a href="/" class="more-info">Home</a> | <a href="/logout">Logout</a></nav>
+            <h1 class="admin-title">Admin Control Panel</h1>
+            <div class="header-links">
+                <a href="/" class="back-home">← Back to Home</a>
+                <a href="/logout" class="logout-link">Logout</a>
+            </div>
         </header>
 
-        <div class="admin-section">
-            <h3>Add New Album</h3>
-            <form action="/admin/add-album" method="POST" class="admin-form">
-                <input type="text" name="title" placeholder="Album Title" required>
-                <input type="number" name="release_year" placeholder="Year" required>
-                <select name="artist_id" required>
-                    <% artists.forEach(artist => { %>
-                        <option value="<%= artist.id %>"><%= artist.name %></option>
-                    <% }) %>
-                </select>
-                <button type="submit" class="more-info-btn" style="border:none;">Add Album</button>
-            </form>
-        </div>
+        <div class="admin-flex-container">
+            <div class="admin-card">
+                <h3>Add New Album</h3>
+                <form action="/admin/add-album" method="POST" enctype="multipart/form-data">
+                    <input type="text" name="title" placeholder="Album Title" required>
+                    
+                    <select name="artist_id" required>
+                        <option value="">Select Artist</option>
+                        <% artists.forEach(artist => { %>
+                            <option value="<%= artist.id %>"><%= artist.name %></option>
+                        <% }) %>
+                    </select>
 
-        <div class="admin-section">
-            <h3>Add New Song</h3>
-            <form action="/admin/add-song" method="POST" class="admin-form">
-                <input type="text" name="title" placeholder="Song Title" required>
-                <input type="number" name="track_number" placeholder="Track #" required>
-                <input type="text" name="length" placeholder="Duration (e.g. 4:20)" required>
-                <select name="album_id" required>
-                    <% albums.forEach(album => { %>
-                        <option value="<%= album.id %>"><%= album.title %></option>
-                    <% }) %>
-                </select>
-                <button type="submit" class="more-info-btn" style="border:none;">Add Song</button>
-            </form>
+                    <input type="number" name="release_year" placeholder="Year">
+                    <textarea name="description" placeholder="Description..." rows="2"></textarea>
+
+                    <div class="custom-upload">
+                        <i data-lucide="image-plus"></i>
+                        <span id="file-name">Click to upload cover</span>
+                        <input type="file" name="album_image" accept="image/*" onchange="document.getElementById('file-name').innerText = this.files[0].name">
+                    </div>
+
+                    <button type="submit" class="btn-save">Save Album</button>
+                </form>
+            </div>
+
+            <div class="admin-card">
+                <h3>Add Artist</h3>
+                <form action="/admin/add-artist" method="POST">
+                    <input type="text" name="name" placeholder="Artist Name" required>
+                    <div class="input-row">
+                        <input type="text" name="genre" placeholder="Genre">
+                        <input type="text" name="origin" placeholder="Origin">
+                    </div>
+                    <button type="submit" class="btn-secondary">Save Artist</button>
+                </form>
+
+                <hr class="divider">
+
+                <h3>Add Song</h3>
+                <form action="/admin/add-song" method="POST">
+                    <select name="album_id" required>
+                        <option value="">Select Album</option>
+                        <% albums.forEach(album => { %>
+                            <option value="<%= album.id %>"><%= album.title %></option>
+                        <% }) %>
+                    </select>
+                    <input type="text" name="title" placeholder="Song Title" required>
+                    <div class="input-row">
+                        <input type="number" name="track_number" placeholder="Track #" min="1">
+                        <input type="text" name="length" placeholder="Duration (4:20)">
+                    </div>
+                    <button type="submit" class="btn-secondary">Add Song</button>
+                </form>
+            </div>
         </div>
     </div>
+
+    <script>
+        lucide.createIcons();
+    </script>
 </body>
 </html>
