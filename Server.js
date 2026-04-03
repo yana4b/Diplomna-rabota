@@ -45,6 +45,7 @@ const isAdmin = (req, res, next) => {
     }
 };
 
+// --- AUTH ROUTES ---
 app.get('/signup', (req, res) => res.render('signup', { error: null }));
 app.post('/signup', (req, res) => {
     const { username, password } = req.body;
@@ -74,13 +75,26 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
+// --- ADMIN ROUTES ---
 app.get('/admin', isAdmin, (req, res) => {
     const artistSql = "SELECT id, name FROM Artists ORDER BY name ASC";
     const albumSql = "SELECT id, title FROM Albums ORDER BY title ASC";
+    const genreSql = "SELECT id, name FROM Genres ORDER BY name ASC";
+    const subgenreSql = "SELECT id, name FROM Subgenres ORDER BY name ASC";
 
     db.all(artistSql, [], (err, artists) => {
         db.all(albumSql, [], (err2, albums) => {
-            res.render('admin', { artists, albums });
+            db.all(genreSql, [], (err3, genres) => {
+                db.all(subgenreSql, [], (err4, subgenres) => {
+                    // Now all 4 variables are passed to the EJS template
+                    res.render('admin', { 
+                        artists, 
+                        albums, 
+                        genres: genres || [], 
+                        subgenres: subgenres || [] 
+                    });
+                });
+            });
         });
     });
 });
@@ -104,11 +118,23 @@ app.post('/admin/add-album', isAdmin, upload.single('album_image'), (req, res) =
     });
 });
 
-app.post('/admin/add-artist', isAdmin, (req, res) => {
+app.post('/admin/add-artist', isAdmin, upload.single('artist_image'), (req, res) => {
     const { name, genre, origin } = req.body;
-    db.run("INSERT INTO Artists (name, genre, origin) VALUES (?, ?, ?)", [name, genre, origin], (err) => {
+    
+    db.run("INSERT INTO Artists (name, genre, origin) VALUES (?, ?, ?)", [name, genre, origin], function(err) {
         if (err) return res.status(500).send(err.message);
-        res.redirect('/admin');
+        
+        const artistId = this.lastID;
+
+        // If an image was uploaded, save it to Artist_images table
+        if (req.file) {
+            db.run("INSERT INTO Artist_images (artist_id, image) VALUES (?, ?)", [artistId, req.file.buffer], (err) => {
+                if (err) console.error("Error saving artist image:", err);
+                res.redirect('/admin');
+            });
+        } else {
+            res.redirect('/admin');
+        }
     });
 });
 
@@ -123,36 +149,91 @@ app.post('/admin/add-song', isAdmin, (req, res) => {
 
 app.post('/admin/delete-album', isAdmin, (req, res) => {
     const { album_id } = req.body;
-    db.run("DELETE FROM Songs WHERE album_id = ?", [album_id], () => {
-        db.run("DELETE FROM Albums WHERE id = ?", [album_id], () => res.redirect('/'));
+    // Sequential deletion to ensure database integrity
+    db.run("DELETE FROM Album_images WHERE album_id = ?", [album_id], () => {
+        db.run("DELETE FROM Songs WHERE album_id = ?", [album_id], () => {
+            db.run("DELETE FROM Albums WHERE id = ?", [album_id], () => {
+                res.redirect('/');
+            });
+        });
     });
 });
 
+// --- API ROUTES ---
 app.use("/albums", albumRoutes);
 app.use("/artists", artistRoutes);
 app.use("/songs", songRoutes);
 
+// --- MAIN SEARCH ROUTE (Handles the Auto-Search Script) ---
 app.get('/', (req, res) => {
-    const { search } = req.query;
-    let sql = `SELECT a.id, a.title, a.release_year, art.name as artistName, art.genre, img.image 
-               FROM Albums a 
-               LEFT JOIN Artists art ON a.artist_id = art.id 
-               LEFT JOIN Album_images img ON a.id = img.album_id 
-               WHERE 1=1`;
-    let params = [];
-    if (search) { 
-        sql += " AND (a.title LIKE ? OR art.name LIKE ?)"; 
-        params.push(`%${search}%`, `%${search}%`); 
-    }
+    const { search, genre, subgenre } = req.query;
     
-    sql += " GROUP BY a.id ORDER BY a.title ASC";
+    // 1. Fetch all main Genres for the first dropdown
+    db.all("SELECT * FROM Genres ORDER BY name ASC", [], (err, allGenres) => {
+        if (err) return res.status(500).send("Database error fetching genres");
 
-    db.all(sql, params, (err, rows) => {
-        const albums = rows.map(row => ({
-            ...row,
-            album_cover: row.image ? `data:image/jpeg;base64,${Buffer.from(row.image).toString('base64')}` : "/img/default.jpg"
-        }));
-        res.render('index', { albums, filters: { search: search || '', genre: '', year: '' } });
+        // 2. If a genre is selected, fetch its specific subgenres
+        let subGenreSql = "SELECT * FROM Subgenres WHERE 1=0"; // Default: fetch nothing
+        let subParams = [];
+        
+        if (genre) {
+            subGenreSql = "SELECT * FROM Subgenres WHERE genre_id = ? ORDER BY name ASC";
+            subParams = [genre];
+        }
+
+        db.all(subGenreSql, subParams, (err, subGenres) => {
+            
+            // 3. Build the main Album query
+            let sql = `SELECT a.id, a.title, a.release_year, art.name as artistName, 
+                              img.image, a.genre_id, a.subgenre_id
+                       FROM Albums a 
+                       LEFT JOIN Artists art ON a.artist_id = art.id 
+                       LEFT JOIN Album_images img ON a.id = img.album_id 
+                       WHERE 1=1`;
+            
+            let params = [];
+            
+            // Text Search Filter
+            if (search && search.trim() !== '') { 
+                sql += " AND (a.title LIKE ? OR art.name LIKE ?)"; 
+                params.push(`%${search}%`, `%${search}%`); 
+            }
+
+            // Genre Filter (Assumes Albums table has genre_id)
+            if (genre && genre !== '') {
+                sql += " AND a.genre_id = ?";
+                params.push(genre);
+            }
+
+            // Subgenre Filter (Assumes Albums table has subgenre_id)
+            if (subgenre && subgenre !== '') {
+                sql += " AND a.subgenre_id = ?";
+                params.push(subgenre);
+            }
+            
+            sql += " GROUP BY a.id ORDER BY a.title ASC";
+
+            db.all(sql, params, (err, rows) => {
+                if (err) return res.status(500).send("Database error fetching albums");
+
+                const albums = rows.map(row => ({
+                    ...row,
+                    album_cover: row.image ? `data:image/jpeg;base64,${Buffer.from(row.image).toString('base64')}` : null
+                }));
+                
+                // 4. Render the page with all necessary data
+                res.render('index', { 
+                    albums, 
+                    allGenres, // All genres for dropdown 1
+                    subGenres, // Filtered subgenres for dropdown 2
+                    filters: { 
+                        search: search || '', 
+                        genre: genre || '', 
+                        subgenre: subgenre || '' 
+                    } 
+                });
+            });
+        });
     });
 });
 

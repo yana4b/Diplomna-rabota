@@ -7,36 +7,49 @@
     <title><%= album.title %></title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
 </head>
-<body>
+<body class="album-page">
     <div id="albumContainer">
         <header class="album-header">
-            <img src="<%= album.album_cover %>" class="albumImage" crossorigin="anonymous">
+            <div class="image-wrapper">
+                <img src="<%= album.album_cover %>" class="albumImage" crossorigin="anonymous">
+            </div>
             <div class="header-text">
-                <p>ALBUM</p>
+                <p class="type-label">ALBUM</p>
                 <h1 class="albumTitle"><%= album.title %></h1>
                 <div class="meta-data">
-                    <strong><%= album.artistName %></strong> • <%= album.release_year %>
+                    <span class="artist-link"><%= album.artistName %></span> • <%= album.release_year %> • <%= songs.length %> songs
                 </div>
             </div>
         </header>
 
         <div class="content-section">
-            <p style="margin-bottom: 20px; opacity: 0.8;"><%= album.description || "No description available." %></p>
+            <div class="glass-bg"></div>
             
-            <div class="list-header"><span>#</span><span>TITLE</span><span>TIME</span></div>
-            <hr style="opacity: 0.1; margin: 10px 0;">
+            <div class="description-box">
+                <p><%= album.description || "No description available." %></p>
+            </div>
             
-            <% songs.forEach(song => { %>
-                <div class="song-row">
-                    <p class="trackNumber"><%= song.track_number %></p>
-                    <a href="/songs/<%= song.id %>" class="songTitle"><%= song.title %></a>
-                    <p class="duration"><%= song.length || "--:--" %></p>
+            <div class="song-table">
+                <div class="list-header">
+                    <span class="col-index">#</span>
+                    <span class="col-title">TITLE</span>
+                    <span class="col-time">DURATION</span>
                 </div>
-            <% }) %>
 
-            <nav style="margin-top: 40px;">
-                <a href="/artists/<%= album.artist_id %>" class="more-info">Back to Artist</a> | 
-                <a href="/" class="more-info">Home</a>
+                <% songs.forEach(song => { %>
+                    <div class="song-row">
+                        <div class="col-index"><%= song.track_number %></div>
+                        <div class="col-title">
+                            <a href="/songs/<%= song.id %>" class="songTitle"><%= song.title %></a>
+                        </div>
+                        <div class="col-time"><%= song.length || "--:--" %></div>
+                    </div>
+                <% }) %>
+            </div>
+
+            <nav class="footer-nav">
+                <a href="/artists/<%= album.artist_id %>" class="pill-btn">Back to Artist</a>
+                <a href="/" class="pill-btn">Home</a>
             </nav>
         </div>
     </div>
@@ -45,11 +58,18 @@
         const img = document.querySelector('.albumImage');
         const container = document.getElementById('albumContainer');
         const colorThief = new ColorThief();
+
         const updateBG = () => {
             const rgb = colorThief.getColor(img);
-            container.style.setProperty('--album-color', `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`);
+            const color = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+            container.style.setProperty('--album-color', color);
         };
-        if (img.complete) updateBG(); else img.addEventListener('load', updateBG);
+
+        if (img.complete) {
+            updateBG();
+        } else {
+            img.addEventListener('load', updateBG);
+        }
     </script>
 </body>
 </html>

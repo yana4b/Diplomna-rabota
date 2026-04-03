@@ -6,21 +6,46 @@
     <link rel="stylesheet" href="/css/styles.css">
     <title><%= artist.name %></title>
 </head>
-<body>
-    <div id="artistContainer">
-        <h1><%= artist.name %></h1>
-        <h2>Discography</h2>
-        <div class="album-grid">
-            <% albums.forEach(album => { %>
-                <div class="albumDisplay">
-                    <img src="<%= album.album_cover %>">
-                    <h3><%= album.title %></h3>
-                    <p><%= album.release_year %></p>
-                    <a href="/albums/<%= album.id %>" class="more-info-btn">More info</a>
-                </div>
-            <% }) %>
+<body class="dark-theme">
+    <nav class="user-controls">
+        <a href="/" class="pill-btn logout-btn">Home</a>
+    </nav>
+
+    <div id="artistPageContainer">
+        <header class="artist-header">
+            <p class="type-label">ARTIST</p>
+            <h1 class="artistNameTitle"><%= artist.name %></h1>
+            <p class="artist-meta">
+                <strong>Genre:</strong> <%= artist.genre %> | 
+                <strong>Origin:</strong> <%= artist.origin %>
+            </p>
+        </header>
+
+        <div class="discography-section">
+            <h2 class="section-title">Discography</h2>
+            
+            <div class="album-list">
+                <% if (albums.length > 0) { %>
+                    <% albums.forEach(album => { %>
+                        <div class="album-card">
+                            <img src="<%= album.album_cover %>" class="album-cover" alt="<%= album.title %>">
+                            
+                            <div class="album-info">
+                                <h3><%= album.title %></h3>
+                                <p class="release-year"><%= album.release_year %></p>
+                                <a href="/albums/<%= album.id %>" class="more-info-btn">View Songs</a>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <p>No albums found for this artist.</p>
+                <% } %>
+            </div>
         </div>
-        <a href="/" class="more-info" style="display:inline-block; margin-top:30px;">Back to Home</a>
+
+        <footer class="footer-nav">
+            <a href="/" class="pill-btn logout-btn">Back to Home</a>
+        </footer>
     </div>
 </body>
 </html>
