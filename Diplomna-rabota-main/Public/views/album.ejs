@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/styles.css">
+    <title><%= album.title %> - <%= artist.name %></title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+</head>
+<body class="album-page">
+    <div id="albumContainer">
+        
+        <header class="album-header">
+            <div class="content-wrapper">
+                <div class="image-wrapper">
+                    <img src="<%= album.album_cover %>" class="albumImage" crossorigin="anonymous">
+                </div>
+                <div class="header-text">
+                    <p class="type-label">ALBUM</p>
+                    <h1 class="albumTitle"><%= album.title %></h1> 
+                    
+                    <div class="meta-data artist-info-row">
+                        <% if (artist.image) { %>
+                            <img src="<%= artist.image %>" class="artist-mini-img" alt="<%= artist.name %>">
+                        <% } %>
+                        <span class="artist-link"><strong><%= artist.name %></strong></span> • 
+                        <%= album.release_year %> • 
+                        <%= songs.length %> songs
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-section">
+            <div class="glass-bg"></div>
+            
+            <div class="content-wrapper column-layout">
+                <div class="description-box" style="margin-bottom: 2rem;">
+                    <p><%= album.description || "No description available." %></p>
+                </div>
+
+                <div class="song-table">
+                    <div class="list-header">
+                        <span class="col-index">#</span>
+                        <span class="col-title">TITLE</span>
+                        <span class="col-time">DURATION</span>
+                    </div>
+
+                    <% songs.forEach(song => { %> 
+                        <a href="/songs/<%= song.id %>" class="song-row-link">
+                            <div class="song-row">
+                                <div class="col-index text-muted"><%= song.track_number %></div>
+                                <div class="col-title">
+                                    <span class="songTitle"><%= song.title %></span>
+                                </div>
+                                <div class="col-time text-muted"><%= song.length || "--:--" %></div>
+                            </div>
+                        </a>
+                    <% }) %>
+                </div>
+
+                <nav class="footer-nav" style="margin-top: 3rem;">
+                    <a href="/artists/<%= album.artist_id %>" class="pill-btn">Back to Artist</a>
+                    <a href="/" class="pill-btn">Home</a>
+                </nav>
+            </div>
+        </div>
+    </div> <script>
+        const img = document.querySelector('.albumImage');
+        const container = document.getElementById('albumContainer');
+        const colorThief = new ColorThief();
+
+        const updateBG = () => {
+            try {
+                if (img && img.src) {
+                    const rgb = colorThief.getColor(img);
+                    container.style.setProperty('--album-color', `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`);
+                }
+            } catch (e) { 
+                console.log("ColorThief waiting for image..."); 
+            }
+        };
+
+        if (img.complete) {
+            updateBG();
+        } else {
+            img.addEventListener('load', updateBG);
+        }
+    </script>
+</body>
+</html>
