@@ -1,11 +1,7 @@
 import sqlite3 from "sqlite3";
 
-// open (or create) the database file in read/write mode
-const db = new sqlite3.Database("./music.db", sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
 
-// create tables if they don't already exist
-// artists -> albums -> songs relationship
-// use AUTOINCREMENT to simplify inserts later
+const db = new sqlite3.Database("./music.db", sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
 
 function initSchema() {
   db.serialize(() => {
@@ -39,7 +35,6 @@ function initSchema() {
   });
 }
 
-// simple seeding of a few records if tables are empty
 function seedData() {
   db.serialize(() => {
     db.get("SELECT COUNT(*) AS count FROM artists", (err, row) => {
@@ -78,11 +73,8 @@ function seedData() {
   });
 }
 
-// initialize schema once when module loads
 initSchema();
 
-// also seed sample rows so front end has something to display
 seedData();
 
-// export the raw db object; callers can run queries or wrap it
 export default db;

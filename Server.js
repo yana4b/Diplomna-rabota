@@ -8,8 +8,7 @@ import db from "./database.js";
 import multer from "multer";
 
 import albumRoutes from "./routes/album.js";
-import artistRoutes from "./routes/artist.js";  
-import songRoutes from "./routes/songs.js";
+import artistRoutes from "./routes/artist.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -45,7 +44,6 @@ const isAdmin = (req, res, next) => {
     }
 };
 
-// --- AUTH ROUTES ---
 app.get('/signup', (req, res) => res.render('signup', { error: null }));
 app.post('/signup', (req, res) => {
     const { username, password } = req.body;
@@ -75,18 +73,16 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
-// --- ADMIN ROUTES ---
 app.get('/admin', isAdmin, (req, res) => {
     const artistSql = "SELECT id, name FROM Artists ORDER BY name ASC";
     const albumSql = "SELECT id, title FROM Albums ORDER BY title ASC";
     const genreSql = "SELECT id, name FROM Genres ORDER BY name ASC";
-    const subgenreSql = "SELECT id, name FROM Subgenres ORDER BY name ASC";
+    const subgenreSql = "SELECT id, name, genre_id FROM Subgenres ORDER BY name ASC";
 
     db.all(artistSql, [], (err, artists) => {
         db.all(albumSql, [], (err2, albums) => {
             db.all(genreSql, [], (err3, genres) => {
                 db.all(subgenreSql, [], (err4, subgenres) => {
-                    // Now all 4 variables are passed to the EJS template
                     res.render('admin', { 
                         artists, 
                         albums, 
@@ -100,80 +96,133 @@ app.get('/admin', isAdmin, (req, res) => {
 });
 
 app.post('/admin/add-album', isAdmin, upload.single('album_image'), (req, res) => {
-    const { title, artist_id, release_year, description } = req.body;
+    const { title, artist_id, release_year, description, genre_id, subgenre_id } = req.body;
+    const album_image = req.file ? req.file.buffer : null;
     
-    db.run("INSERT INTO Albums (title, artist_id, release_year, description) VALUES (?, ?, ?, ?)", 
-    [title, artist_id, release_year, description], function(err) {
-        if (err) return res.status(500).send(err.message);
-        
-        const albumId = this.lastID;
+    const sql = `INSERT INTO Albums (title, artist_id, release_year, description, genre_id, subgenre_id, album_image) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`;
 
-        if (req.file) {
-            db.run("INSERT INTO Album_images (album_id, image) VALUES (?, ?)", [albumId, req.file.buffer], (err) => {
-                res.redirect('/admin');
-            });
-        } else {
-            res.redirect('/admin');
-        }
-    });
-});
-
-app.post('/admin/add-artist', isAdmin, upload.single('artist_image'), (req, res) => {
-    const { name, genre, origin } = req.body;
-    
-    db.run("INSERT INTO Artists (name, genre, origin) VALUES (?, ?, ?)", [name, genre, origin], function(err) {
-        if (err) return res.status(500).send(err.message);
-        
-        const artistId = this.lastID;
-
-        // If an image was uploaded, save it to Artist_images table
-        if (req.file) {
-            db.run("INSERT INTO Artist_images (artist_id, image) VALUES (?, ?)", [artistId, req.file.buffer], (err) => {
-                if (err) console.error("Error saving artist image:", err);
-                res.redirect('/admin');
-            });
-        } else {
-            res.redirect('/admin');
-        }
-    });
-});
-
-app.post('/admin/add-song', isAdmin, (req, res) => {
-    const { title, album_id, track_number, length } = req.body;
-    db.run("INSERT INTO Songs (title, album_id, track_number, length) VALUES (?, ?, ?, ?)", 
-    [title, album_id, track_number, length], (err) => {
+    db.run(sql, [title, artist_id, release_year, description, genre_id, subgenre_id, album_image], function(err) {
         if (err) return res.status(500).send(err.message);
         res.redirect('/admin');
     });
 });
 
+app.post('/admin/add-artist', isAdmin, upload.single('artist_image'), (req, res) => {
+    const { name, genre_id, origin } = req.body; // Using genre_id now
+    const artist_image = req.file ? req.file.buffer : null;
+    
+    const sql = `INSERT INTO Artists (name, genre_id, origin, artist_image) VALUES (?, ?, ?, ?)`;
+
+    db.run(sql, [name, genre_id, origin, artist_image], function(err) {
+        if (err) return res.status(500).send(err.message);
+        res.redirect('/admin');
+    });
+});
+
+app.post('/admin/add-song', isAdmin, upload.single('songFile'), (req, res) => {
+    // 1. Destructure only the fields that exist in your form and DB
+    const { title, album_id, artist_id, track_number, length } = req.body;
+    const song_audio = req.file ? req.file.buffer : null;
+
+    if (!song_audio) {
+        return res.status(400).send("Please upload an MP3 file.");
+    }
+
+    const songSql = `INSERT INTO Songs (title, album_id, artist_id, track_number, length, song_audio) 
+                     VALUES (?, ?, ?, ?, ?, ?)`;
+    
+    const params = [
+        title, 
+        album_id, 
+        artist_id, 
+        track_number || 0,       
+        length || "0:00",       
+        song_audio
+    ];
+
+    db.run(songSql, params, function(err) {
+        if (err) {
+            console.error("Database Error:", err.message);
+            return res.status(500).send("Database Error: " + err.message);
+        }
+        console.log(`Song added successfully with ID: ${this.lastID}`);
+        res.redirect('/admin');
+    });
+});
+
 app.post('/admin/delete-album', isAdmin, (req, res) => {
-    const { album_id } = req.body;
-    // Sequential deletion to ensure database integrity
-    db.run("DELETE FROM Album_images WHERE album_id = ?", [album_id], () => {
-        db.run("DELETE FROM Songs WHERE album_id = ?", [album_id], () => {
-            db.run("DELETE FROM Albums WHERE id = ?", [album_id], () => {
-                res.redirect('/');
-            });
+    const { album_id } = req.body;  
+    db.run("DELETE FROM Songs WHERE album_id = ?", [album_id], () => {
+        db.run("DELETE FROM Albums WHERE id = ?", [album_id], () => {
+            res.redirect('/');
         });
     });
 });
 
-// --- API ROUTES ---
+app.post('/admin/delete-song', isAdmin, (req, res) => {
+    const { song_id, album_id } = req.body;
+    
+    db.run("DELETE FROM Songs WHERE id = ?", [song_id], (err) => {
+        if (err) {
+            console.error("Error deleting song:", err.message);
+            return res.status(500).send("Database error");
+        }
+        res.redirect(`/albums/${album_id}`);
+    });
+});
+
+app.get('/stream-song/:id', (req, res) => {
+    if (!req.session.user) {
+        return res.status(403).send("Authentication required.");
+    }
+
+    const songId = req.params.id;
+    db.get("SELECT song_audio FROM Songs WHERE id = ?", [songId], (err, song) => {
+        if (err || !song || !song.song_audio) {
+            return res.status(404).send("Song not found.");
+        }
+
+        const audioBuffer = song.song_audio;
+        const totalSize = audioBuffer.length;
+        const range = req.headers.range;
+
+        if (range) {
+            const parts = range.replace(/bytes=/, "").split("-");
+            const start = parseInt(parts[0], 10);
+            const end = parts[1] ? parseInt(parts[1], 10) : totalSize - 1;
+            const chunksize = (end - start) + 1;
+            
+            const head = {
+                'Content-Range': `bytes ${start}-${end}/${totalSize}`,
+                'Accept-Ranges': 'bytes',
+                'Content-Length': chunksize,
+                'Content-Type': 'audio/mpeg',
+            };
+
+            res.writeHead(206, head); 
+            res.end(audioBuffer.slice(start, end + 1));
+        } else {
+            const head = {
+                'Content-Length': totalSize,
+                'Content-Type': 'audio/mpeg',
+            };
+            res.writeHead(200, head);
+            res.end(audioBuffer);
+        }
+    });
+});
+
 app.use("/albums", albumRoutes);
 app.use("/artists", artistRoutes);
-app.use("/songs", songRoutes);
 
-// --- MAIN SEARCH ROUTE (Handles the Auto-Search Script) ---
 app.get('/', (req, res) => {
     const { search, genre, subgenre } = req.query;
     
-    // 1. Fetch all main Genres for the first dropdown
     db.all("SELECT * FROM Genres ORDER BY name ASC", [], (err, allGenres) => {
         if (err) return res.status(500).send("Database error fetching genres");
 
-        // 2. If a genre is selected, fetch its specific subgenres
-        let subGenreSql = "SELECT * FROM Subgenres WHERE 1=0"; // Default: fetch nothing
+        let subGenreSql = "SELECT * FROM Subgenres WHERE 1=0"; 
         let subParams = [];
         
         if (genre) {
@@ -183,49 +232,46 @@ app.get('/', (req, res) => {
 
         db.all(subGenreSql, subParams, (err, subGenres) => {
             
-            // 3. Build the main Album query
             let sql = `SELECT a.id, a.title, a.release_year, art.name as artistName, 
-                              img.image, a.genre_id, a.subgenre_id
+                              a.album_image as image, a.genre_id, a.subgenre_id
                        FROM Albums a 
                        LEFT JOIN Artists art ON a.artist_id = art.id 
-                       LEFT JOIN Album_images img ON a.id = img.album_id 
                        WHERE 1=1`;
             
             let params = [];
             
-            // Text Search Filter
             if (search && search.trim() !== '') { 
                 sql += " AND (a.title LIKE ? OR art.name LIKE ?)"; 
                 params.push(`%${search}%`, `%${search}%`); 
             }
-
-            // Genre Filter (Assumes Albums table has genre_id)
             if (genre && genre !== '') {
                 sql += " AND a.genre_id = ?";
                 params.push(genre);
             }
 
-            // Subgenre Filter (Assumes Albums table has subgenre_id)
+            
             if (subgenre && subgenre !== '') {
                 sql += " AND a.subgenre_id = ?";
                 params.push(subgenre);
             }
             
-            sql += " GROUP BY a.id ORDER BY a.title ASC";
+            
+            sql += " ORDER BY a.title COLLATE NOCASE ASC";
 
             db.all(sql, params, (err, rows) => {
-                if (err) return res.status(500).send("Database error fetching albums");
+                if (err) return res.status(500).send("Database error fetching albums: " + err.message);
 
+                // Convert BLOB to Base64 for the EJS template
                 const albums = rows.map(row => ({
                     ...row,
                     album_cover: row.image ? `data:image/jpeg;base64,${Buffer.from(row.image).toString('base64')}` : null
                 }));
                 
-                // 4. Render the page with all necessary data
+                // 4. Render the page
                 res.render('index', { 
                     albums, 
-                    allGenres, // All genres for dropdown 1
-                    subGenres, // Filtered subgenres for dropdown 2
+                    allGenres: allGenres || [], 
+                    subGenres: subGenres || [], 
                     filters: { 
                         search: search || '', 
                         genre: genre || '', 

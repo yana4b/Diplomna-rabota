@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>Admin Control Panel</title>
+</head>
+<body class="admin-page">
+    <div id="container" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+        <header class="home-header">
+            <h1 class="admin-title">Admin Control Panel</h1>
+            <div class="filter-group">
+                <a href="/" class="pill-btn">Back to Home</a>
+                <a href="/logout" class="pill-btn logout-btn">Logout</a>
+            </div>
+        </header>
+
+        <div class="admin-grid">
+            
+            <section class="admin-section main-form">
+                <div class="admin-card-flat">
+                    <h3 class="section-label">Add Album</h3>
+                    <form action="/admin/add-album" method="POST" enctype="multipart/form-data" class="auth-form">
+                        <input type="text" name="title" class="auth-input" placeholder="Album Title" required>
+                        
+                        <div class="form-row">
+                            <select name="artist_id" class="custom-select" required>
+                                <option value="" hidden>Select Artist</option>
+                                <% artists.forEach(artist => { %>
+                                    <option value="<%= artist.id %>"><%= artist.name %></option>
+                                <% }) %>
+                            </select>
+                            <input type="number" name="release_year" class="auth-input" placeholder="Year" style="width: 120px; flex: none;">
+                        </div>
+
+                        <div class="form-row">
+                            <select name="genre_id" id="genre-select" class="custom-select" required>
+                                <option value="" hidden>Select Genre</option>
+                                <% genres.forEach(genre => { %>
+                                    <option value="<%= genre.id %>"><%= genre.name %></option>
+                                <% }) %>
+                            </select>
+
+                            <select name="subgenre_id" id="subgenre-select" class="custom-select" disabled>
+                                <option value="" data-genre="none" disabled selected hidden>Select Subgenre</option>
+                                <% subgenres.forEach(sub => { %>
+                                    <option value="<%= sub.id %>" data-genre="<%= sub.genre_id %>"><%= sub.name %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+
+                        <textarea name="description" class="auth-input admin-textarea" placeholder="Album Description..." rows="4"></textarea>
+
+                        <div class="dropzone-wrapper">
+                            <i data-lucide="image-plus"></i>
+                            <p id="file-name">Click to upload cover</p>
+                            <input type="file" name="album_image" id="album_image" accept="image/*" required 
+                                   onchange="document.getElementById('file-name').innerText = 'Selected: ' + this.files[0].name">
+                        </div>
+
+                        <button type="submit" class="pill-btn admin-btn btn-full">Save Album</button>
+                    </form>
+                </div>
+            </section>
+
+            <aside class="admin-sidebar">
+                <div class="admin-card-flat">
+                    <h3 class="section-label">ADD SONG</h3>
+                    <form action="/admin/add-song" method="POST" enctype="multipart/form-data" class="auth-form">
+                        <input type="text" name="title" class="auth-input" placeholder="Song Title" required>
+                        
+                        <div class="form-row">
+                            <input type="number" name="track_number" class="auth-input" placeholder="Track #" min="1">
+                            <input type="text" name="length" class="auth-input" placeholder="Length (e.g. 4:20)">
+                        </div>
+
+                        <select name="album_id" class="custom-select" required>
+                            <option value="" hidden disabled selected>Select Album</option>
+                            <% albums.forEach(album => { %>
+                                <option value="<%= album.id %>"><%= album.title %></option>
+                            <% }) %>
+                        </select>
+
+                        <select name="artist_id" class="custom-select" required>
+                            <option value="" hidden disabled selected>Select Artist</option>
+                            <% artists.forEach(artist => { %>
+                                <option value="<%= artist.id %>"><%= artist.name %></option>
+                            <% }) %>
+                        </select>
+
+                        <div class="dropzone-wrapper small-dz">
+                            <i data-lucide="music"></i>
+                            <p id="song-file-name">Upload MP3</p>
+                            <input type="file" name="songFile" accept="audio/mpeg" required 
+                                onchange="document.getElementById('song-file-name').innerText = 'Selected: ' + this.files[0].name">
+                        </div>
+
+                        <button type="submit" class="pill-btn admin-btn btn-full">Save Song</button>
+                    </form>
+                </div>
+            </aside>
+
+            <section class="admin-full-width">
+                <div class="admin-card-flat artist-card">
+                    <h3 class="section-label">Add Artist</h3>
+                    <form action="/admin/add-artist" method="POST" enctype="multipart/form-data" class="auth-form">
+                        
+                        <div class="artist-input-group">
+                            <div class="input-main">
+                                <input type="text" name="name" class="auth-input" placeholder="Artist Name" required>
+                            </div>
+                            <div class="input-details">
+                                <select name="genre_id" class="custom-select" required>  
+                                    <option value="" hidden disabled selected>Select Genre</option>
+                                    <% genres.forEach(genre => { %>
+                                        <option value="<%= genre.id %>"><%= genre.name %></option>
+                                    <% }) %>
+                                </select>
+                                <input type="text" name="origin" class="auth-input" placeholder="Origin (Country/City)">
+                            </div>
+                        </div>
+
+                        <div class="dropzone-wrapper artist-dz">
+                            <i data-lucide="user-plus"></i>
+                            <p id="artist-file-name">Upload Artist Photo</p>
+                            <input type="file" name="artist_image" accept="image/*" required
+                                onchange="document.getElementById('artist-file-name').innerText = 'Selected: ' + this.files[0].name">
+                        </div>
+
+                        <div class="action-footer">
+                            <button type="submit" class="pill-btn admin-btn btn-full">Save Artist</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Subgenre Filter Logic
+        const genreSelect = document.getElementById('genre-select');
+        const subgenreSelect = document.getElementById('subgenre-select');
+        const allSubOptions = Array.from(subgenreSelect.querySelectorAll('option')).filter(opt => opt.getAttribute('data-genre') !== 'none');
+        const subPlaceholder = subgenreSelect.querySelector('option[data-genre="none"]');
+
+        genreSelect.addEventListener('change', function() {
+            const selectedGenreId = this.value;
+            subgenreSelect.disabled = !selectedGenreId;
+            subgenreSelect.innerHTML = '';
+            subgenreSelect.appendChild(subPlaceholder);
+
+            const matches = allSubOptions.filter(opt => opt.getAttribute('data-genre') == selectedGenreId);
+            matches.forEach(opt => subgenreSelect.appendChild(opt));
+            subgenreSelect.value = "";
+        });
+    </script>
+</body>
+</html>

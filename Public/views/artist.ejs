@@ -9,22 +9,19 @@
 <body class="dark-theme">
 
     <div id="artistPageContainer">
-        <header class="artist-header">
-            <div class="header-content">
-                <div class="artist-details">
-                    <p class="type-label">ARTIST</p>
-                    <h1 class="artistNameTitle"><%= artist.name %></h1>
-                    <p class="artist-meta">
-                        <strong>Genre:</strong> <%= artist.genre %> |
-                        <strong>Origin:</strong> <%= artist.origin %>
-                    </p>
-                </div>
-
-                <% if (artist.image) { %>
-                    <div class="artist-image-container">
-                        <img src="<%= artist.image %>" alt="<%= artist.name %>" class="artist-profile-img">
+        <header class="artist-header" style="background-image: url('<%= artist.image %>');">
+            <div class="header-overlay">
+                <div class="header-content">
+                    <div class="artist-details">
+                        <p class="type-label">ARTIST</p>
+                        <h1 class="artistNameTitle"><%= artist.name %></h1>
+                        <p class="artist-meta">
+                            <span><strong>Genre:</strong> <%= artist.genre %></span>
+                            <span>|</span>
+                            <span><strong>Origin:</strong> <%= artist.origin %></span>
+                        </p>
                     </div>
-                <% } %>
+                    </div>
             </div>
         </header>
 

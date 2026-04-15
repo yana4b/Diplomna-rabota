@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/styles.css">
+    <title><%= album.title %> - <%= artist.name %></title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
+</head>
+
+<body class="album-page">
+    <div id="albumContainer">
+
+        <header class="album-header">
+            <div class="content-wrapper">
+                <div class="image-wrapper">
+                    <img src="<%= album.album_cover %>" class="albumImage" crossorigin="anonymous">
+                </div>
+                <div class="header-text">
+                    <p class="type-label">ALBUM</p>
+                    <h1 class="albumTitle"><%= album.title %></h1>
+                    <div class="meta-data artist-info-row">
+                        <span class="artist-link"><strong><%= artist.name %></strong></span> •
+                        <%= album.release_year %> •
+                        <%= Array.isArray(songs) ? songs.length : 0 %> songs
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-section">
+            <div class="glass-bg"></div>
+            <div class="content-wrapper column-layout">
+                <div class="description-box" style="margin-bottom: 2rem;">
+                    <p><%= album.description || "No description available." %></p>
+                </div>
+                <div class="song-table">
+                    <div class="list-header">
+                        <span class="col-index">#</span>
+                        <span class="col-title">TITLE</span>
+                        <span class="col-time">DURATION</span>
+                    </div>
+
+                    <% songs.forEach((song, index) => { %>
+                        <div class="song-row <%= (typeof user !== 'undefined' && user) ? 'play-trigger' : 'locked-song' %>" 
+                            data-index="<%= index %>" 
+                            data-src="/stream-song/<%= song.id %>" 
+                            data-title="<%= song.title %>"
+                            data-artist="<%= artist.name %>"
+                            <% if (typeof user === 'undefined' || !user) { %> onclick="alert('Please login to listen!')" <% } %> >
+                            
+                            <div class="col-index text-muted">
+                                <% if (typeof user !== 'undefined' && user) { %>
+                                    <%= song.track_number %>
+                                <% } else { %>
+                                    🔒
+                                <% } %>
+                            </div>
+                            
+                            <div class="col-title">
+                                <span class="songTitle"><%= song.title %></span>
+                            </div>
+
+                            <div class="col-time text-muted">
+                                <% if (song.duration) { %>
+                                    <% 
+                                        // Check if it's a number (seconds) or already a string (M:SS)
+                                        let displayDuration = song.duration;
+                                        if (!isNaN(song.duration) && song.duration !== "") {
+                                            let totalSeconds = parseInt(song.duration);
+                                            let mins = Math.floor(totalSeconds / 60);
+                                            let secs = totalSeconds % 60;
+                                            displayDuration = mins + ":" + secs.toString().padStart(2, '0');
+                                        }
+                                    %>
+                                    <%= displayDuration %>
+                                <% } else { %>
+                                    --:--
+                                <% } %>
+                            </div>
+                            <% if (user && user.role === 'admin') { %>
+                                <div class="col-admin-actions">
+                                    <form action="/admin/delete-song" method="POST" onsubmit="return confirm('Delete this song?');">
+                                        <input type="hidden" name="song_id" value="<%= song.id %>">
+                                        <input type="hidden" name="album_id" value="<%= album.id %>">
+                                        <button type="submit" class="delete-circle-btn-mini">✕</button>
+                                    </form>
+                                </div>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <nav class="footer-nav" style="margin-top: 3rem; margin-bottom: 120px;">
+                    <a href="/artists/<%= album.artist_id %>" class="pill-btn">Go to Artist</a>
+                    <a href="/" class="pill-btn">Home</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <% if (typeof user !== 'undefined' && user) { %>
+    <div id="master-player">
+        <div class="player-inner">
+            <div class="player-info">
+                <p id="p-title">Select a song</p>
+                <p id="p-artist" class="text-muted"></p>
+            </div>
+            <div class="player-controls">
+                <button id="prev-btn" class="nav-btn">⏮</button>
+                <audio id="audio-element" controls controlsList="nodownload"></audio>
+                <button id="next-btn" class="nav-btn">⏭</button>
+            </div>
+            <button id="close-player">✕</button>
+        </div>
+    </div>
+    <% } %>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Color Thief Logic ---
+            const img = document.querySelector('.albumImage');
+            const container = document.getElementById('albumContainer');
+            const colorThief = new ColorThief();
+
+            const updateBG = () => {
+                try {
+                    if (img && img.src && img.complete) {
+                        const rgb = colorThief.getColor(img);
+                        container.style.setProperty('--album-color', `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`);
+                    }
+                } catch (e) { console.log("Waiting for image..."); }
+            };
+
+            if (img.complete) { updateBG(); } else { img.addEventListener('load', updateBG); }
+
+            // --- Player Logic ---
+            const playerBar = document.getElementById('master-player');
+            if (playerBar) {
+                const audio = document.getElementById('audio-element');
+                const pTitle = document.getElementById('p-title');
+                const pArtist = document.getElementById('p-artist');
+                const nextBtn = document.getElementById('next-btn');
+                const prevBtn = document.getElementById('prev-btn');
+                const closeBtn = document.getElementById('close-player');
+                
+                let currentIdx = -1;
+                const rows = document.querySelectorAll('.play-trigger');
+
+                const playSong = (index) => {
+                    if (index < 0 || index >= rows.length) return;
+                    const row = rows[index];
+                    currentIdx = index;
+                    
+                    pTitle.innerText = row.getAttribute('data-title');
+                    pArtist.innerText = row.getAttribute('data-artist');
+                    audio.src = row.getAttribute('data-src');
+                    
+                    playerBar.classList.add('active');
+                    audio.play();
+
+                    rows.forEach(r => r.classList.remove('active-playing'));
+                    row.classList.add('active-playing');
+                };
+
+                rows.forEach((row, i) => {
+                    row.addEventListener('click', () => playSong(i));
+                });
+
+                if (nextBtn) nextBtn.addEventListener('click', () => playSong(currentIdx + 1));
+                if (prevBtn) prevBtn.addEventListener('click', () => playSong(currentIdx - 1));
+                
+                audio.addEventListener('ended', () => {
+                    if (currentIdx < rows.length - 1) playSong(currentIdx + 1);
+                });
+
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => {
+                        audio.pause();
+                        playerBar.classList.remove('active');
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
