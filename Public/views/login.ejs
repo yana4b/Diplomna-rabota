@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/styles.css">
-    <title>Login - Music App</title>
+    <title>Вход - Музикално приложение</title>
 </head>
 <body class="auth-page">
     <div class="auth-wrapper">
         <div class="auth-container">
             <header class="auth-header">
-                <h1>Login</h1>
+                <h1>Вход</h1>
             </header>
 
             <% if (error) { %> 
@@ -18,17 +18,17 @@
             <% } %>
 
             <form action="/login" method="POST" id="auth-form">
-                <input type="text" name="username" class="auth-input" placeholder="Username" required>
-                <input type="password" name="password" class="auth-input" placeholder="Password" required>
+                <input type="text" name="username" class="auth-input" placeholder="Потребителско име" required>
+                <input type="password" name="password" class="auth-input" placeholder="Парола" required>
                 
                 <button type="submit" class="pill-btn admin-btn btn-full">
-                    Sign In
+                    Влез
                 </button>
             </form>
 
             <p style="margin-top: 30px; color: #a7a7a7; font-size: 0.9rem;">
-                Don't have an account? 
-                <a href="/signup" style="color:#1DB954; text-decoration:none; font-weight:bold; margin-left: 5px;">Sign up here</a>
+                Нямате акаунт? 
+                <a href="/signup" style="color:#1DB954; text-decoration:none; font-weight:bold; margin-left: 5px;">Регистрирайте се тук</a>
             </p>
         </div>
     </div>

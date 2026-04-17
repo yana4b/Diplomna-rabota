@@ -40,7 +40,7 @@ const isAdmin = (req, res, next) => {
     if (req.session.user && req.session.user.role === 'admin') {
         next();
     } else {
-        res.status(403).render('login', { error: "Unauthorized: Admins only." });
+        res.status(403).render('login', { error: "Неоторизиран достъп: Само за администратори." });
     }
 };
 
@@ -50,7 +50,7 @@ app.post('/signup', (req, res) => {
     const hash = bcrypt.hashSync(password, 10);
     db.run("INSERT INTO Users (username, password_hash, role) VALUES (?, ?, ?)", 
     [username, hash, 'user'], (err) => {
-        if (err) return res.render('signup', { error: "Username taken." });
+        if (err) return res.render('signup', { error: "Потребителското име е заето." });
         res.redirect('/login');
     });
 });
@@ -63,7 +63,7 @@ app.post('/login', (req, res) => {
             req.session.user = { id: user.id, username: user.username, role: user.role };
             res.redirect('/');
         } else {
-            res.render('login', { error: "Invalid credentials" });
+            res.render('login', { error: "Невалидни данни за вход" });
         }
     });
 });
@@ -103,30 +103,29 @@ app.post('/admin/add-album', isAdmin, upload.single('album_image'), (req, res) =
                  VALUES (?, ?, ?, ?, ?, ?, ?)`;
 
     db.run(sql, [title, artist_id, release_year, description, genre_id, subgenre_id, album_image], function(err) {
-        if (err) return res.status(500).send(err.message);
+        if (err) return res.status(500).send("Грешка при добавяне на албум: " + err.message);
         res.redirect('/admin');
     });
 });
 
 app.post('/admin/add-artist', isAdmin, upload.single('artist_image'), (req, res) => {
-    const { name, genre_id, origin } = req.body; // Using genre_id now
+    const { name, genre_id, origin } = req.body;
     const artist_image = req.file ? req.file.buffer : null;
     
     const sql = `INSERT INTO Artists (name, genre_id, origin, artist_image) VALUES (?, ?, ?, ?)`;
 
     db.run(sql, [name, genre_id, origin, artist_image], function(err) {
-        if (err) return res.status(500).send(err.message);
+        if (err) return res.status(500).send("Грешка при добавяне на изпълнител: " + err.message);
         res.redirect('/admin');
     });
 });
 
 app.post('/admin/add-song', isAdmin, upload.single('songFile'), (req, res) => {
-    // 1. Destructure only the fields that exist in your form and DB
     const { title, album_id, artist_id, track_number, length } = req.body;
     const song_audio = req.file ? req.file.buffer : null;
 
     if (!song_audio) {
-        return res.status(400).send("Please upload an MP3 file.");
+        return res.status(400).send("Моля, качете MP3 файл.");
     }
 
     const songSql = `INSERT INTO Songs (title, album_id, artist_id, track_number, length, song_audio) 
@@ -136,17 +135,16 @@ app.post('/admin/add-song', isAdmin, upload.single('songFile'), (req, res) => {
         title, 
         album_id, 
         artist_id, 
-        track_number || 0,       
-        length || "0:00",       
+        track_number || 0,      
+        length || "0:00",      
         song_audio
     ];
 
     db.run(songSql, params, function(err) {
         if (err) {
-            console.error("Database Error:", err.message);
-            return res.status(500).send("Database Error: " + err.message);
+            console.error("Грешка в базата данни:", err.message);
+            return res.status(500).send("Грешка в базата данни: " + err.message);
         }
-        console.log(`Song added successfully with ID: ${this.lastID}`);
         res.redirect('/admin');
     });
 });
@@ -165,8 +163,8 @@ app.post('/admin/delete-song', isAdmin, (req, res) => {
     
     db.run("DELETE FROM Songs WHERE id = ?", [song_id], (err) => {
         if (err) {
-            console.error("Error deleting song:", err.message);
-            return res.status(500).send("Database error");
+            console.error("Грешка при изтриване на песен:", err.message);
+            return res.status(500).send("Грешка в базата данни");
         }
         res.redirect(`/albums/${album_id}`);
     });
@@ -174,13 +172,13 @@ app.post('/admin/delete-song', isAdmin, (req, res) => {
 
 app.get('/stream-song/:id', (req, res) => {
     if (!req.session.user) {
-        return res.status(403).send("Authentication required.");
+        return res.status(403).send("Изисква се вход в системата.");
     }
 
     const songId = req.params.id;
     db.get("SELECT song_audio FROM Songs WHERE id = ?", [songId], (err, song) => {
         if (err || !song || !song.song_audio) {
-            return res.status(404).send("Song not found.");
+            return res.status(404).send("Песента не е намерена.");
         }
 
         const audioBuffer = song.song_audio;
@@ -220,7 +218,7 @@ app.get('/', (req, res) => {
     const { search, genre, subgenre } = req.query;
     
     db.all("SELECT * FROM Genres ORDER BY name ASC", [], (err, allGenres) => {
-        if (err) return res.status(500).send("Database error fetching genres");
+        if (err) return res.status(500).send("Грешка при извличане на жанрове");
 
         let subGenreSql = "SELECT * FROM Subgenres WHERE 1=0"; 
         let subParams = [];
@@ -249,25 +247,21 @@ app.get('/', (req, res) => {
                 params.push(genre);
             }
 
-            
             if (subgenre && subgenre !== '') {
                 sql += " AND a.subgenre_id = ?";
                 params.push(subgenre);
             }
             
-            
             sql += " ORDER BY a.title COLLATE NOCASE ASC";
 
             db.all(sql, params, (err, rows) => {
-                if (err) return res.status(500).send("Database error fetching albums: " + err.message);
+                if (err) return res.status(500).send("Грешка при извличане на албуми: " + err.message);
 
-                // Convert BLOB to Base64 for the EJS template
                 const albums = rows.map(row => ({
                     ...row,
                     album_cover: row.image ? `data:image/jpeg;base64,${Buffer.from(row.image).toString('base64')}` : null
                 }));
                 
-                // 4. Render the page
                 res.render('index', { 
                     albums, 
                     allGenres: allGenres || [], 
@@ -283,4 +277,4 @@ app.get('/', (req, res) => {
     });
 });
 
-app.listen(3000, () => console.log("Server running at http://localhost:3000"));
+app.listen(3000, () => console.log("Сървърът стартира на http://localhost:3000"));

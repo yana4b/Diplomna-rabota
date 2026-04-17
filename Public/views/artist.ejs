@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,20 +13,18 @@
             <div class="header-overlay">
                 <div class="header-content">
                     <div class="artist-details">
-                        <p class="type-label">ARTIST</p>
+                        <p class="type-label">ИЗПЪЛНИТЕЛ</p>
                         <h1 class="artistNameTitle"><%= artist.name %></h1>
                         <p class="artist-meta">
-                            <span><strong>Genre:</strong> <%= artist.genre %></span>
-                            <span>|</span>
-                            <span><strong>Origin:</strong> <%= artist.origin %></span>
+                            <strong>Произход:</strong> <%= artist.origin %>
                         </p>
                     </div>
-                    </div>
+                </div>
             </div>
         </header>
 
         <div class="discography-section">
-            <h2 class="section-title">Discography</h2>
+            <h2 class="section-title">Дискография</h2>
             
             <div class="album-list">
                 <% if (albums.length > 0) { %>
@@ -38,17 +36,17 @@
                                 <div class="album-info">
                                     <h3><%= album.title %></h3>
                                     <p class="release-year"><%= album.release_year %></p>
-                                    </div>
+                                </div>
                             </div>
                         </a>
                     <% }) %>
                 <% } else { %>
-                    <p>No albums found for this artist.</p>
+                    <p>Няма намерени албуми за този изпълнител.</p>
                 <% } %>
             </div>
 
         <footer class="footer-nav">
-            <a href="/" class="pill-btn logout-btn">Back to Home</a>
+            <a href="/" class="pill-btn logout-btn">Обратно към началото</a>
         </footer>
     </div>
 </body>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg">
 
 <head>
     <meta charset="UTF-8">
@@ -18,12 +18,12 @@
                     <img src="<%= album.album_cover %>" class="albumImage" crossorigin="anonymous">
                 </div>
                 <div class="header-text">
-                    <p class="type-label">ALBUM</p>
+                    <p class="type-label">АЛБУМ</p>
                     <h1 class="albumTitle"><%= album.title %></h1>
                     <div class="meta-data artist-info-row">
                         <span class="artist-link"><strong><%= artist.name %></strong></span> •
                         <%= album.release_year %> •
-                        <%= Array.isArray(songs) ? songs.length : 0 %> songs
+                        <%= Array.isArray(songs) ? songs.length : 0 %> песни
                     </div>
                 </div>
             </div>
@@ -33,13 +33,13 @@
             <div class="glass-bg"></div>
             <div class="content-wrapper column-layout">
                 <div class="description-box" style="margin-bottom: 2rem;">
-                    <p><%= album.description || "No description available." %></p>
+                    <p><%= album.description || "Няма налично описание." %></p>
                 </div>
                 <div class="song-table">
                     <div class="list-header">
                         <span class="col-index">#</span>
-                        <span class="col-title">TITLE</span>
-                        <span class="col-time">DURATION</span>
+                        <span class="col-title">ЗАГЛАВИЕ</span>
+                        <span class="col-time">ВРЕМЕТРАЕНЕ</span>
                     </div>
 
                     <% songs.forEach((song, index) => { %>
@@ -48,7 +48,7 @@
                             data-src="/stream-song/<%= song.id %>" 
                             data-title="<%= song.title %>"
                             data-artist="<%= artist.name %>"
-                            <% if (typeof user === 'undefined' || !user) { %> onclick="alert('Please login to listen!')" <% } %> >
+                            <% if (typeof user === 'undefined' || !user) { %> onclick="alert('Моля, влезте в профила си, за да слушате!')" <% } %> >
                             
                             <div class="col-index text-muted">
                                 <% if (typeof user !== 'undefined' && user) { %>
@@ -65,7 +65,6 @@
                             <div class="col-time text-muted">
                                 <% if (song.duration) { %>
                                     <% 
-                                        // Check if it's a number (seconds) or already a string (M:SS)
                                         let displayDuration = song.duration;
                                         if (!isNaN(song.duration) && song.duration !== "") {
                                             let totalSeconds = parseInt(song.duration);
@@ -81,7 +80,7 @@
                             </div>
                             <% if (user && user.role === 'admin') { %>
                                 <div class="col-admin-actions">
-                                    <form action="/admin/delete-song" method="POST" onsubmit="return confirm('Delete this song?');">
+                                    <form action="/admin/delete-song" method="POST" onsubmit="return confirm('Изтриване на песента?');">
                                         <input type="hidden" name="song_id" value="<%= song.id %>">
                                         <input type="hidden" name="album_id" value="<%= album.id %>">
                                         <button type="submit" class="delete-circle-btn-mini">✕</button>
@@ -93,8 +92,8 @@
                 </div>
 
                 <nav class="footer-nav" style="margin-top: 3rem; margin-bottom: 120px;">
-                    <a href="/artists/<%= album.artist_id %>" class="pill-btn">Go to Artist</a>
-                    <a href="/" class="pill-btn">Home</a>
+                    <a href="/artists/<%= album.artist_id %>" class="pill-btn">Към изпълнителя</a>
+                    <a href="/" class="pill-btn">Начало</a>
                 </nav>
             </div>
         </div>
@@ -104,7 +103,7 @@
     <div id="master-player">
         <div class="player-inner">
             <div class="player-info">
-                <p id="p-title">Select a song</p>
+                <p id="p-title">Изберете песен</p>
                 <p id="p-artist" class="text-muted"></p>
             </div>
             <div class="player-controls">
@@ -119,7 +118,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Color Thief Logic ---
             const img = document.querySelector('.albumImage');
             const container = document.getElementById('albumContainer');
             const colorThief = new ColorThief();
@@ -135,7 +133,6 @@
 
             if (img.complete) { updateBG(); } else { img.addEventListener('load', updateBG); }
 
-            // --- Player Logic ---
             const playerBar = document.getElementById('master-player');
             if (playerBar) {
                 const audio = document.getElementById('audio-element');

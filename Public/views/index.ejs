@@ -1,38 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bg">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/styles.css">
-    <title>Music App</title>
+    <title>Музикално приложение</title>
 </head>
 <body class="home-page">
 
     <nav class="user-controls">
         <% if (user) { %>
-            <span class="user-status">Logged in as <strong><%= user.username %></strong></span>
+            <span class="user-status">Влезли сте като <strong><%= user.username %></strong></span>
             <% if (user.role === 'admin') { %>
-                <a href="/admin" class="pill-btn admin-btn">Admin Panel</a>
+                <a href="/admin" class="pill-btn admin-btn">Админ панел</a>
             <% } %>
-            <a href="/logout" class="pill-btn logout-btn">Logout</a>
+            <a href="/logout" class="pill-btn logout-btn">Изход</a>
         <% } else { %>
-            <a href="/login" class="pill-btn admin-btn">Login</a>
+            <a href="/login" class="pill-btn admin-btn">Вход</a>
         <% } %>
     </nav>
 
     <div id="container">
         <header class="home-header">
-            <h1>Music App</h1>
+            <h1>Музикално приложение</h1>
             
             <form action="/" method="GET" id="search-form" class="main-filter-form">
                 <div class="search-wrapper">
-                    <input type="text" name="search" id="search-input" placeholder="Search..." value="<%= filters.search %>" autocomplete="off">
-                    <span id="search-status" style="opacity: 0;">Searching...</span>
+                    <input type="text" name="search" id="search-input" placeholder="Търсене..." value="<%= filters.search %>" autocomplete="off">
+                    <span id="search-status" style="opacity: 0;">Търсене...</span>
                 </div>
 
                 <div class="filter-group">
                     <select name="genre" id="genre-select" class="custom-select" onchange="this.form.submit()">
-                        <option value="">All Genres</option>
+                        <option value="">Всички жанрове</option>
                         <% allGenres.forEach(genre => { %>
                             <option value="<%= genre.id %>" <%= filters.genre == genre.id ? 'selected' : '' %>>
                                 <%= genre.name %>
@@ -42,7 +42,7 @@
 
                     <% if (subGenres && subGenres.length > 0) { %>
                         <select name="subgenre" id="subgenre-select" class="custom-select" onchange="this.form.submit()">
-                            <option value="">All Subgenres</option>
+                            <option value="">Всички поджанрове</option>
                             <% subGenres.forEach(sub => { %>
                                 <option value="<%= sub.id %>" <%= filters.subgenre == sub.id ? 'selected' : '' %>>
                                     <%= sub.name %>
@@ -57,14 +57,14 @@
         <main class="album-list">
             <% if (albums.length === 0) { %>
                 <div style="grid-column: 1/-1; padding: 40px; text-align: center;">
-                    <h3 style="color: #666;">No results found</h3>
-                    <a href="/" style="color: #1DB954; text-decoration: none; font-weight: bold;">Show all albums</a>
+                    <h3 style="color: #666;">Няма намерени резултати</h3>
+                    <a href="/" style="color: #1DB954; text-decoration: none; font-weight: bold;">Покажи всички албуми</a>
                 </div>
             <% } else { %>
                 <% albums.forEach(album => { %>
                     <div class="album-card">
                         <% if (user && user.role === 'admin') { %>
-                            <form action="/admin/delete-album" method="POST" class="admin-delete-form" onsubmit="return confirm('Delete this album?');">
+                            <form action="/admin/delete-album" method="POST" class="admin-delete-form" onsubmit="return confirm('Изтриване на този албум?');">
                                 <input type="hidden" name="album_id" value="<%= album.id %>">
                                 <button type="submit" class="delete-circle-btn">✕</button>
                             </form>
@@ -73,7 +73,7 @@
                             <% if (album.album_cover) { %>
                                 <img src="<%= album.album_cover %>" alt="Cover" class="album-cover">
                             <% } else { %>
-                                <div class="no-cover-placeholder">No Cover</div>
+                                <div class="no-cover-placeholder">Няма обложка</div>
                             <% } %>
                             <h2><%= album.title %></h2>
                             <p><%= album.artistName %> • <%= album.release_year %></p>
